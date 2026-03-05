@@ -1,0 +1,29 @@
+
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - BD_HOST=db
+      - BD_PORT=5432
+      - BD_NAME=AVTOprokat
+      - BD_USER=postgres
+      - BD_PASSWORD=root
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: AVTOprokat
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
