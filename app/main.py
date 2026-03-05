@@ -7,15 +7,18 @@ from api.rental import router as rental_router
 from api.repair import router as repair_router
 # from controllers.eventLog import router as eventLog_router
 
-from db.db import create_tables, drop_tables
+from db.db import create_tables, drop_tables, create_admin
 from fastapi_pagination import add_pagination
 from core.security import oauth2_scheme
+
+
 
 # error
 from core.global_handler import integrity_error_handler, sqlalchemy_error_handler, http_exception_handler, global_exception_handler, validation_exception_handler
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from fastapi.exceptions import RequestValidationError
+
 
 
 # Создаем приложение
@@ -82,11 +85,12 @@ def root():
         "version": "1.0.0",
         "test": "docker"
     }
-
+        
 
 
 if __name__ == "__main__":
     # drop_tables()
+    create_admin()
     create_tables()
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
