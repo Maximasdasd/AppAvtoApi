@@ -79,7 +79,8 @@ def root():
     return {
         "message": "Car Rental API",
         "docs": "/docs",
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "test": "docker"
     }
 
 

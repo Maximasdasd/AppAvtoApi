@@ -9,6 +9,6 @@ RUN pip install -r requirements.txt
 COPY .env ./
 COPY app/. ./
 COPY alembic.ini ./
-COPY alembic/ ./alembic/
+COPY alembic ./alembic/
 
 ENTRYPOINT ["python", "-m", "main"]
