@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = Field(default=30)
     
     model_config = SettingsConfigDict(
-        env_file=".env", # ../.env # .env (для миграций для докера)
+        env_file="../.env", # ../.env # .env (для миграций для докера а также для вставки данных)
         env_file_encoding="utf-8",
         case_sensitive=False,
     )

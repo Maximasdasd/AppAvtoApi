@@ -4,7 +4,7 @@ from datetime import datetime
 
 class ClientBase(BaseModel):
     full_name: str
-    driver_license: str = Field(max_length=9, min_length=9)
+    driver_license: str = Field(max_length=11, min_length=5)
     passport: str
     address: Optional[str]
     # @field_validator("driver_license")
