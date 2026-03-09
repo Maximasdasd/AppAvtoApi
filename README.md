@@ -19,7 +19,8 @@ Uvicorn — ASGI-сервер
 
 
 ## **Структура проекта**
-appAvto/
+appAvto\fastapi_service\
+appAvto\django_web\
 
 
 ## **Структура базы данных**
@@ -120,10 +121,12 @@ alembic upgrade head
 
 
 5. Запуск приложения  
-ИЗ ДИРЕКТОРИИ!!! appAvto\app  
-cd C:\Users\79000\Desktop\appAvto\app>  
+API  
+ИЗ ДИРЕКТОРИИ!!! appAvto\fastapi_service\app  
+cd C:\Users\79000\Desktop\appAvto\fastapi_service\app>  
 ЗАПУСК!!!  
 python -m main
+DJANGO  
 
 
 6. (Только для разработчиков) создание миграции команда:  
@@ -131,8 +134,8 @@ alembic revision --autogenerate -m "Название миграции(напри
 alembic upgrade head
 
 
-7. для вставки фейк данных (тестирования) или для докера
-Необходимо поменять в файле config переменную к пути .env файла
+7. для вставки фейк данных (тестирования) или для докера  
+Необходимо поменять в файле config переменную к пути .env файла  
 тк для фейк данных или докера запускается с другой директории
 
 
