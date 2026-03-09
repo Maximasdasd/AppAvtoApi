@@ -91,48 +91,47 @@ description (str) — описание события
 git clone <ваш-репозиторий>
 cd appAvto
 
-2. Создание виртуального окружения
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
+2. Создание виртуального окружения  
+python -m venv venv  
+source venv/bin/activate  # Linux/Mac  
+venv\Scripts\activate     # Windows  
 
-venv\Scripts\activate     # Windows
-
-3. Установка зависимостей
+3. Установка зависимостей  
 pip install -r requirements.txt
 
-4. Настройка базы данных
-Создайте файл .env в корневой папке:
-POSTGRES_SERVER=localhost
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=ваш_пароль
-POSTGRES_DB=tourism_db
-SECRET_KEY=ваш_секретный_ключ
+4. Настройка базы данных  
+Создайте файл .env в корневой папке:  
+POSTGRES_SERVER=localhost  
+POSTGRES_USER=postgres  
+POSTGRES_PASSWORD=ваш_пароль  
+POSTGRES_DB=tourism_db  
+SECRET_KEY=ваш_секретный_ключ  
 
-СДЕЛАТЬ ПОСЛЕ СОЗДАНИЯ БД!!!
-ДЛЯ МИГРАЦИЙ!!
-Откройте alembic.ini.
-Найдите строку sqlalchemy.url.
-Измените её на ваши параметры подключения:
-PostgreSQL: postgresql://user:password@localhost:5432/dbname
-MySQL: mysql+pymysql://user:password@localhost:3306/dbname
+СДЕЛАТЬ ПОСЛЕ СОЗДАНИЯ БД!!!  
+ДЛЯ МИГРАЦИЙ!!  
+Откройте alembic.ini.  
+Найдите строку sqlalchemy.url.  
+Измените её на ваши параметры подключения:  
+PostgreSQL: postgresql://user:password@localhost:5432/dbname 
+MySQL: mysql+pymysql://user:password@localhost:3306/dbname  
 
-И ВВЕСТИ ДАННУЮ КОМАНДУ
+И ВВЕСТИ ДАННУЮ КОМАНДУ  
 alembic upgrade head
 
 
-5. Запуск приложения
-ИЗ ДИРЕКТОРИИ!!! appAvto\app
-cd C:\Users\79000\Desktop\appAvto\app>
-ЗАПУСК!!!
+5. Запуск приложения  
+ИЗ ДИРЕКТОРИИ!!! appAvto\app  
+cd C:\Users\79000\Desktop\appAvto\app>  
+ЗАПУСК!!!  
 python -m main
 
 
-6. (Только для разработчиков) создание миграции команда:
-alembic revision --autogenerate -m "Название миграции(например что меняется)"
+6. (Только для разработчиков) создание миграции команда:  
+alembic revision --autogenerate -m "Название миграции(например что меняется)"  
 alembic upgrade head
 
 
-Документация API
+Документация API  
 После запуска приложения доступны:
 
 Swagger UI: http://localhost:8000/docs
