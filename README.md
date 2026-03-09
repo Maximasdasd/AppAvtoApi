@@ -19,37 +19,7 @@ Uvicorn — ASGI-сервер
 
 
 Структура проекта
-CarRentalAPI/
-├── app/
-│   ├── main.py                    # Точка входа приложения
-│   ├── config.py             # Конфигурация приложения
-│   ├── security.py           # Функции безопасности и аутентификации
-│   ├──models/
-│   │    └──model.py    # Таблицы баз данных модели
-│   ├── db/                       # Работа с базой данных
-│   │    └── db.py           # Настройка подключения к БД
-│   ├── controllers/              # API endpoints (роутеры)
-│   │   ├── api/
-│   │   │    ├── auth.py           # Аутентификация
-│   │   │    ├── client.py         # Клиенты
-│   │   │    ├── car.py            # Автомобили
-│   │   │    ├── rentals.py        # Аренда автомобилей
-│   │   │    ├── repairs.py        # Ремонты автомобилей
-│   │   │    ├── reports.py        # Отчеты
-│   │   │    └── eventlog.py       # Журнал событий
-│   │   └── services/                 # Бизнес-логика (сервисы)
-│   │        ├── client_service.py     # CRUD операции для клиентов
-│   │        ├── car_service.py        # CRUD операции для автомобилей
-│   │        ├── rental_service.py     # Логика аренды
-│   │        ├── repair_service.py     # Логика ремонтов
-│   │        ├── report_service.py     # Генерация отчетов
-│   │        └── eventlog_service.py   # Работа с журналом событий
-│   ├── schemas/                  # Pydantic схемы
-│      └── schemas.py            # Все схемы для валидации данных
-├── requirements.txt              # Зависимости Python
-├── .env                          # Переменные окружения
-├── .gitignore                    # Git игнорируемые файлы
-└── README.md                     # Документация
+appAvto/
 
 
 Структура базы данных
@@ -116,99 +86,6 @@ description (str) — описание события
 Администратор (admin) — полный доступ кроме отчетности
 Директор (director) — полный доступ с отчетностью
 Пользователь (manager) — работа с клиентами, авто, арендой, ремонтом
-
-Получение токена:
-POST /auth/login
-Content-Type: application/x-www-form-urlencoded
-
-username=ваш_логин&password=ваш_пароль
-
-
-Основные API endpoints
-1. Аутентификация
-POST /auth/login — вход в систему
-
-POST /auth/register — регистрация нового сотрудника
-
-2. Клиенты
-GET /clients/ — получение списка всех клиентов
-
-POST /clients/ — регистрация нового клиента
-
-GET /clients/{client_id} — получение клиента по ID
-
-PUT /clients/{client_id} — обновление данных клиента
-
-DELETE /clients/{client_id} — удаление клиента
-
-POST /clients/{client_id}/deactivate — снятие клиента с обслуживания
-
-GET /clients/search/license/{driver_license} — поиск клиента по номеру водительского удостоверения
-
-GET /clients/search/name-address/{search_term} — поиск клиента по фрагментам ФИО или адреса
-
-DELETE /clients/ — очистка данных о клиентах (только для админов/директоров)
-
-3. Автомобили
-GET /cars/ — просмотр всех автомобилей
-
-POST /cars/ — добавление нового автомобиля
-
-GET /cars/{car_id} — получение автомобиля по ID
-
-PUT /cars/{car_id} — обновление данных автомобиля
-
-DELETE /cars/{car_id} — удаление автомобиля
-
-GET /cars/search/number/{car_number} — поиск автомобиля по госномеру
-
-GET /cars/search/brand/{brand} — поиск автомобиля по марке
-
-GET /cars/available/ — получение доступных автомобилей (с фильтром по категории)
-
-DELETE /cars/ — удаление всех автомобилей (только для админов/директоров)
-
-4. Аренда
-POST /rentals/ — регистрация выдачи автомобиля клиенту
-
-POST /rentals/{rental_id}/return — регистрация возврата автомобиля
-
-POST /rentals/{rental_id}/cancel — отмена аренды
-
-GET /rentals/client/{client_id} — получение истории аренд клиента
-
-GET /rentals/car/{car_id} — получение истории аренд автомобиля
-
-5. Ремонты
-POST /repairs/{car_id}/send — регистрация отправки автомобиля в ремонт
-
-POST /repairs/{repair_id}/return — регистрация прибытия автомобиля из ремонта
-
-GET /repairs/car/{car_id} — получение истории ремонтов автомобиля
-
-GET /repairs/active/ — получение списка автомобилей в ремонте
-
-6. Отчеты
-GET /reports/revenue/ — отчет по среднему доходу за прокат авто (только для директора)
-
-GET /reports/statistics/ — статистический отчет по доходу по категориям (только для директора)
-
-GET /reports/availability/ — отчет о доступности автомобилей на дату (только для директора)
-
-GET /reports/eventlog/export/excel — экспорт журнала событий в Excel (админы/директора)
-
-7. Журнал событий
-GET /eventlog/ — просмотр журнала событий (админы/директора)
-
-GET /eventlog/filter/staff/{staff_id} — фильтрация журнала по сотруднику
-
-GET /eventlog/filter/date/ — фильтрация журнала по дате (start_date, end_date)
-
-GET /eventlog/filter/ — комбинированная фильтрация по сотруднику и/или дате
-
-
-
-
 
 Установка и запуск
 
