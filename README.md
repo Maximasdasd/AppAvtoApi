@@ -102,11 +102,11 @@ pip install -r requirements.txt
 
 4. Настройка базы данных  
 Создайте файл .env в корневой папке:  
-POSTGRES_SERVER=localhost  
-POSTGRES_USER=postgres  
-POSTGRES_PASSWORD=ваш_пароль  
-POSTGRES_DB=tourism_db  
-SECRET_KEY=ваш_секретный_ключ  
+BD_HOST=localhost
+BD_USER=postgres
+BD_PASSWORD=root
+BD_NAME=AVTOprokat
+
 
 СДЕЛАТЬ ПОСЛЕ СОЗДАНИЯ БД!!!  
 ДЛЯ МИГРАЦИЙ!!  
