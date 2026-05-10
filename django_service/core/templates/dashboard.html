@@ -37,9 +37,9 @@
       </div>
       <div class="stat-card">
         <div class="stat-label">Клиенты</div>
-        <div class="stat-value" style="color:var(--green)">{{ total_client }}</div>
+        <div class="stat-value" style="color:var(--green)">{{ client_isactive }}</div>
         <div class="stat-meta">
-          <span class="badge badge-blue">всего в базе #</span>
+          <span class="badge badge-blue">{{ total_client }} всего в базе</span>
         </div>
       </div>
       <div class="stat-card">
@@ -174,15 +174,15 @@
               <tbody>
               {% for car in cars %}
               <tr>
-                <td class="td-mono">#{{ car.id }}</td>
+                <td class="td-mono">#{{ car.car_id }}</td>
                 <td class="td-primary">{{ car.brand }} {{ car.model }}</td>
-                <td class="td-mono">{{ car.plate }}</td>
+                <td class="td-mono">{{ car.number_car }}</td>
                 <td>
-                  {% if car.status == 'rented' %}
+                  {% if car.is_available == 'rented' %}
                     <span class="badge badge-amber">В аренде</span>
-                  {% elif car.status == 'available' %}
+                  {% elif car.is_available == 'available' %}
                     <span class="badge badge-green">Свободен</span>
-                  {% elif car.status == 'repair' %}
+                  {% elif car.is_available == 'under_repair' %}
                     <span class="badge badge-red">Ремонт</span>
                   {% else %}
                     <span class="badge">{{ car.get_status_display }}</span>
