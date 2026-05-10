@@ -338,7 +338,16 @@
     font-family: var(--mono);
   }
  
-  .table-wrap { overflow-x: auto; }
+.table-wrap {
+    max-height: 400px;
+    overflow: auto;
+    display: block;
+}
+
+.table-wrap table {
+    display: table;
+    width: 100%;
+}
  
   table {
     width: 100%;

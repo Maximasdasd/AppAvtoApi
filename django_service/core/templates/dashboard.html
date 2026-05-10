@@ -32,7 +32,7 @@
         <div class="stat-label">Автомобили</div>
         <div class="stat-value" style="color:var(--accent)">{{ total_cars }}</div>
         <div class="stat-meta">
-          <span class="badge badge-green">● # свободны</span>
+          <span class="badge badge-green">● {{ cars_is_available }} свободны</span>
         </div>
       </div>
       <div class="stat-card">
@@ -44,14 +44,14 @@
       </div>
       <div class="stat-card">
         <div class="stat-label">Активные аренды</div>
-        <div class="stat-value" style="color:var(--amber)">{{ total_rent }}</div>
+        <div class="stat-value" style="color:var(--amber)">{{ cars_is_rented }}</div>
         <div class="stat-meta">
-          <span class="badge badge-amber">● # завершаются сегодня</span>
+          <span class="badge badge-amber">● {{end_time_rentals}} завершаются сегодня</span>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-label">В ремонте</div>
-        <div class="stat-value" style="color:var(--red)">{{ total_repair }}</div>
+        <div class="stat-value" style="color:var(--red)">{{ cars_is_repair }}</div>
         <div class="stat-meta">
           <span class="badge badge-red">● # требуют внимания </span>
         </div>
@@ -86,7 +86,7 @@
             <tr>
               <th>ID</th>
               <th>Клиент</th>
-              <th>Автомобиль</th>
+              <th>Автомобиль (id)</th>
               <th>Начало</th>
               <th>Конец</th>
               <th>Статус</th>
@@ -97,18 +97,18 @@
             <tbody>
               {% for rent in rentals %}
               <tr>
-                <td class="td-mono">#{{ rent.id }}</td>
-                <td class="td-primary">{{ rent.client.full_name }}</td>
-                <td>{{ rent.car.model }} · {{ rent.car.plate }}</td>
-                <td class="td-mono">{{ rent.start_date|date:"d.m.Y" }}</td>
-                <td class="td-mono">{{ rent.end_date|date:"d.m.Y" }}</td>
+                <td class="td-mono">#{{ rent.rental_id }}</td>
+                <td class="td-primary">{{ rent.client_id }}</td>
+                <td>{{ rent.car_id }} · {{ rent.total_price }}</td>
+                <td class="td-mono">{{ rent.start_time }}</td>
+                <td class="td-mono">{{ rent.end_time }}</td>
                 <td>
                   <span class="badge {% if rent.status == 'active' %}badge-green{% elif rent.status == 'completed' %}badge-blue{% else %}badge-red{% endif %}">
                     <span class="dot {% if rent.status == 'active' %}dot-green{% elif rent.status == 'completed' %}dot-blue{% else %}dot-red{% endif %}"></span>
-                    {{ rent.get_status_display }}
+                    {{ rent.status_rent }}
                   </span>
                 </td>
-                <td class="td-mono">{{ rent.manager.username }}</td>
+                <td class="td-mono">{{ rent.staff_id }}</td>
                 <td>
                   <div class="table-actions">
                     <a href="/rentals/{{ rent.id }}" class="btn btn-ghost btn-sm">Детали</a>
@@ -132,18 +132,6 @@
               {% endfor %}
             </tbody>
         </table>
-      </div>
- 
-      <div class="section-footer">
-        <span class="section-meta">Показано 3 из 18</span>
-        <div class="pagination">
-          <a href="?page=1" class="page-btn active">1</a>
-          <a href="?page=2" class="page-btn">2</a>
-          <a href="?page=3" class="page-btn">3</a>
-          <span style="color:var(--text3);padding:0 4px;font-size:12px">···</span>
-          <a href="?page=6" class="page-btn">6</a>
-          <a href="?page=2" class="page-btn">›</a>
-        </div>
       </div>
     </div>
  
