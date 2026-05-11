@@ -73,7 +73,7 @@
             <a href="?status=CANCELLED" class="tab">Отменённые</a>
           </div>
           <!-- POST /create_rental -->
-          <a href="/rentals/create" class="btn btn-primary btn-sm">
+          <a href="#" onclick="openRentalModal()" class="btn btn-primary btn-sm">
             <svg class="icon" viewBox="0 0 24 24" style="width:13px;height:13px"><path d="M12 5v14M5 12h14"/></svg>
             Новая аренда
           </a>
@@ -103,8 +103,8 @@
                 <td class="td-mono">{{ rent.start_time }}</td>
                 <td class="td-mono">{{ rent.end_time }}</td>
                 <td>
-                  <span class="badge {% if rent.status == 'active' %}badge-green{% elif rent.status == 'completed' %}badge-blue{% else %}badge-red{% endif %}">
-                    <span class="dot {% if rent.status == 'active' %}dot-green{% elif rent.status == 'completed' %}dot-blue{% else %}dot-red{% endif %}"></span>
+                  <span class="badge {% if rent.status_rent == 'active' %}badge-green{% elif rent.status_rent == 'completed' %}badge-blue{% else %}badge-red{% endif %}">
+                    <span class="dot {% if rent.status_rent == 'active' %}dot-green{% elif rent.status_rent == 'completed' %}dot-blue{% else %}dot-red{% endif %}"></span>
                     {{ rent.status_rent }}
                   </span>
                 </td>
@@ -143,7 +143,7 @@
         <div class="section-header">
           <span class="section-title">Автомобили</span>
           <span class="section-meta">GET /get_cars_all</span>
-          <a href="/cars/create" class="btn btn-ghost btn-sm">
+          <a href="#" class="btn btn-ghost btn-sm" onclick="openCarModal()">
             <svg class="icon" viewBox="0 0 24 24" style="width:13px;height:13px"><path d="M12 5v14M5 12h14"/></svg>
           </a>
         </div>
@@ -216,7 +216,7 @@
               <tr>
                 <th>ID</th>
                 <th>Авто</th>
-                <th>Описание</th>
+                <th>Цена</th>
                 <th>Статус</th>
                 <th></th>
               </tr>
@@ -224,22 +224,18 @@
             <tbody>
                 {% for repair in repairs %}
                 <tr>
-                  <td class="td-mono">#{{ repair.id }}</td>
-                  <td class="td-mono">{{ repair.car.brand }} #{{ repair.car.id }}</td>
-                  <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ repair.description }}</td>
+                  <td class="td-mono">#{{ repair.repair_id }}</td>
+                  <td class="td-mono">{{ repair.car.brand }} #{{ repair.car_id }}</td>
+                  <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ repair.price_rep }}</td>
                   <td>
-                    {% if repair.status == 'in_progress' %}
+                    {% if repair.end_rep == null %}
                       <span class="badge badge-amber">В процессе</span>
-                    {% elif repair.status == 'completed' %}
+                    {% elif repair.end_rep != null %}
                       <span class="badge badge-blue">Завершён</span>
-                    {% elif repair.status == 'pending' %}
-                      <span class="badge">Ожидает</span>
-                    {% else %}
-                      <span class="badge">{{ repair.get_status_display }}</span>
                     {% endif %}
                   </td>
                   <td>
-                    {% if repair.status == 'in_progress' or repair.status == 'pending' %}
+                    {% if repair.end_rep == null %}
                     <!-- Завершить ремонт -->
                     <form method="post" action="/repairs/{{ repair.id }}/complete" style="display:inline">
                       {% csrf_token %}
@@ -269,10 +265,145 @@
           <a href="/repairs" style="font-size:12px;color:var(--accent);text-decoration:none">Все ремонты →</a>
         </div>
       </div>
- 
+    </div>
+  </main>
+
+
+<!-- модальное окно добавления авто -->
+<div style="display:none" id="carModal" class="modal-overlay">
+<div style="max-width:600px;margin:28px auto">
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Добавить автомобиль</span>
+      <span class="section-meta">POST /create_car</span>
     </div>
  
-  </main>
-  <!-- {% endblock content %} -->
+    <div style="padding:20px 24px">
+      <form method="post" action="/car/create_car">
+        {% csrf_token %}
+        <div class="form-row">
+          <div class="form-group">
+            <label for="brand">Марка</label>
+            <input type="text" id="brand" name="brand" placeholder="Toyota">
+          </div>
+          <div class="form-group">
+            <label for="model">Категория 'ECONOMY' 'STANDARD' 'PREMIUM' 'LUX'</label>
+            <input type="text" id="category" name="category" placeholder="">
+          </div>
+        </div>
  
+        <div class="form-row">
+          <div class="form-group">
+            <label for="year">Год выпуска</label>
+            <input type="number" id="year" name="year_release" placeholder="2023" min="2000" max="2030">
+          </div>
+          <div class="form-group">
+            <label for="license_plate">Гос. номер</label>
+            <input type="text" id="license_plate" name="number_car" placeholder="A123BC">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="price_per_day">Цена / день (₽)</label>
+            <input type="number" id="price_per_day" name="daily_price" placeholder="3500">
+          </div>
+          <div class="form-group">
+            <label for="mileage">Цвет</label>
+            <input type="text" id="mileage" name="color" placeholder="blue">
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+          <a href="" onclick="closeCarModal()" class="btn btn-ghost">Отмена</a>
+          <button onclick="closeCarModal()" type="submit" class="btn btn-primary">Создать автомобиль</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<script>
+  // вкл\выкл модального окна
+  function openCarModal() {
+    document.getElementById('carModal').style.display = 'flex';
+  }
+  
+  function closeCarModal() {
+    document.getElementById('carModal').style.display = 'none';
+  }
+</script>
+
+<!-- конец модального окна добавления авто -->
+
+<!-- модальное окно новой аренды -->
+<div style="display:none" id="tmpl-create-rental" class="modal-overlay">
+<div style="max-width:600px;margin:28px auto">
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Создать аренду</span>
+      <span class="section-meta">POST /create_rental</span>
+    </div>
+    <div style="padding:20px 24px">
+      <form method="post" action="/rentals/create">
+        {% csrf_token %}
+        <div class="form-group">
+          <label>Клиент</label>
+          <select name="client_id">
+            <option value="">— Выберите клиента —</option>
+            <!-- {% for c in clients %} -->
+            <option value="1">Иванов А.С.</option>
+            <option value="2">Петров Д.И.</option>
+            <!-- {% endfor %} -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Автомобиль</label>
+          <select name="car_id">
+            <option value="">— Выберите автомобиль —</option>
+            <!-- {% for car in available_cars %} -->
+            <option value="11">BMW X5 · B456DE</option>
+            <!-- {% endfor %} -->
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Дата начала</label>
+            <input type="date" name="start_date">
+          </div>
+          <div class="form-group">
+            <label>Дата окончания</label>
+            <input type="date" name="end_date">
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+          <a href="#" onclick="closeRentalModal()" class="btn btn-ghost">Отмена</a>
+          <button type="submit" class="btn btn-primary">Создать аренду</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<script>
+  // вкл\выкл модального окна
+  function openRentalModal() {
+    document.getElementById('tmpl-create-rental').style.display = 'flex';
+  }
+  
+  function closeRentalModal() {
+    document.getElementById('tmpl-create-rental').style.display = 'none';
+  }
+</script>
+<!-- конец модального окна аренды -->
+
+
+<!-- модальное окно деталей -->
+<!-- конец модального окна деталей -->
+
+
+  {% endblock content %}
+
 </div>
