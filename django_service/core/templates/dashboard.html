@@ -87,6 +87,7 @@
               <th>ID</th>
               <th>Клиент</th>
               <th>Автомобиль (id)</th>
+              <th>Цена</th>
               <th>Начало</th>
               <th>Конец</th>
               <th>Статус</th>
@@ -99,7 +100,8 @@
               <tr>
                 <td class="td-mono">#{{ rent.rental_id }}</td>
                 <td class="td-primary">{{ rent.client_id }}</td>
-                <td>{{ rent.car_id }} · {{ rent.total_price }}</td>
+                <td>{{ rent.car_id }}</td>
+                <td>{{ rent.total_price }}</td>
                 <td class="td-mono">{{ rent.start_time }}</td>
                 <td class="td-mono">{{ rent.end_time }}</td>
                 <td>
@@ -345,40 +347,43 @@
       <span class="section-meta">POST /create_rental</span>
     </div>
     <div style="padding:20px 24px">
-      <form method="post" action="/rentals/create">
+      <form method="post" action="/rental/create_rental">
         {% csrf_token %}
         <div class="form-group">
           <label>Клиент</label>
           <select name="client_id">
             <option value="">— Выберите клиента —</option>
-            <!-- {% for c in clients %} -->
-            <option value="1">Иванов А.С.</option>
-            <option value="2">Петров Д.И.</option>
-            <!-- {% endfor %} -->
+            {% for c in clients %}
+            <option value="{{ c.client_id }}">
+              {{ c.full_name }} id{{ c.client_id }}
+            </option>
+            {% endfor %}
           </select>
         </div>
         <div class="form-group">
           <label>Автомобиль</label>
           <select name="car_id">
             <option value="">— Выберите автомобиль —</option>
-            <!-- {% for car in available_cars %} -->
-            <option value="11">BMW X5 · B456DE</option>
-            <!-- {% endfor %} -->
+            {% for car in available_cars_all %}
+            <option value="{{ car.car_id }}">
+              {{ car.number_car }} | {{ car.brand }} | id{{ car.car_id }}
+            </option>
+            {% endfor %}
           </select>
         </div>
         <div class="form-row">
           <div class="form-group">
             <label>Дата начала</label>
-            <input type="date" name="start_date">
+            <input type="datetime-local" name="start_time">
           </div>
           <div class="form-group">
             <label>Дата окончания</label>
-            <input type="date" name="end_date">
+            <input type="datetime-local" name="end_time">
           </div>
         </div>
         <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
           <a href="#" onclick="closeRentalModal()" class="btn btn-ghost">Отмена</a>
-          <button type="submit" class="btn btn-primary">Создать аренду</button>
+          <button type="submit" onclick="closeRentalModal()" class="btn btn-primary">Создать аренду</button>
         </div>
       </form>
     </div>

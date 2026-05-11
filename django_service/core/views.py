@@ -76,8 +76,10 @@ def dashboard(request):
         client_is_active = [i for i in data_client["items"] if i['is_active']]
         context["client_isactive"] = len(client_is_active)
         context['total_client'] = len(data_client['items'])
+        context['clients'] = data_client['items']
     except Exception as e:
         print(f"Исключение при запросе к FastAPI: {e}")
+        context['clients'] = 0
         context["total_client"] = 0
         context['client_isactive'] = 0
 
@@ -86,10 +88,12 @@ def dashboard(request):
         data_cars = get_fastapi(request, "car/get_cars_all")
         cars_is_available = [i for i in data_cars["items"] if i['is_available'] == 'available']
         context["cars_is_available"] = len(cars_is_available)
+        context["available_cars_all"] = cars_is_available
         context["total_cars"] = len(data_cars['items'])
         context["cars"] = data_cars['items']
     except Exception as e:
         print(f"Исключение при запросе к FastAPI: {e}")
+        context["available_cars_all"] = 0
         context["total_cars"] = 0
         context["cars"] = []
         context["cars_is_available"] = 0
@@ -186,8 +190,39 @@ def car_create(request):
     return redirect('home')
 
 
-def rent_complete(request):
-    headers = get_headers(request)
+def rent_create(request):
+    headers=get_headers(request)
 
+    if request.method != 'POST':
+        return redirect('home')
+
+    client_id = request.POST.get('client_id')
+    car_id = request.POST.get('car_id')
+    start_time = request.POST.get('start_time')
+    end_time = request.POST.get('end_time')
+
+    print(f'{client_id}, {car_id}, {start_time}, {end_time}')
+    if not all([client_id, car_id, start_time, end_time]):
+        messages.error(request, 'Заполните все поля')
+        return redirect('home')
+
+    rent_data = {
+        'client_id': client_id,
+        'car_id': car_id,
+        'start_time': start_time,
+        'end_time': end_time,
+    }
+        
     if headers:
-        pass
+        response = requests.post(
+                f'{FASTAPI_BASE_URL}/rental/create_rental',  # твой FastAPI endpoint
+                json=rent_data,
+                timeout=10,
+                headers=headers
+            )
+            
+        if response.status_code == 200:
+            messages.success(request, 'Автомобиль успешно добавлен')
+        else:
+            messages.error(request, f'Ошибка: {response.json().get("detail", "Неизвестная ошибка")}')
+    return redirect('home')
