@@ -126,7 +126,6 @@ API
 cd C:\Users\79000\Desktop\appAvto\fastapi_service\app>  
 ЗАПУСК!!!  
 python -m main
-DJANGO  
 
 
 6. (Только для разработчиков) создание миграции команда:  

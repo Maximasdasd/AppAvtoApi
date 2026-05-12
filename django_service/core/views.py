@@ -130,6 +130,7 @@ def dashboard(request):
     try:
         data_repair = get_fastapi(request, 'repair/get_repair_all')
         context['repairs'] = data_repair['items']
+        print(data_repair['items'])
     except Exception as e:
         print(f"Исключение при запросе к FastAPI: {e}")
         context["repairs"] = []
@@ -177,7 +178,6 @@ def car_create(request):
             )
         
         if response.status_code == 200:
-            print
             messages.success(request, 'Автомобиль успешно добавлен')
         else:
             messages.error(request, f'Ошибка: {response.json().get("detail", "Неизвестная ошибка")}')
@@ -225,4 +225,114 @@ def rent_create(request):
             messages.success(request, 'Автомобиль успешно добавлен')
         else:
             messages.error(request, f'Ошибка: {response.json().get("detail", "Неизвестная ошибка")}')
+    return redirect('home')
+
+
+def repair_create(request):
+    headers = get_headers(request)
+    if request.method == 'POST':
+        car_id = request.POST.get('car_id')
+        start_rep = request.POST.get('start_rep')
+        price_rep = request.POST.get('price_rep')
+
+        from datetime import datetime
+        dt = datetime.strptime(start_rep, "%Y-%m-%dT%H:%M")
+        start_rep_iso = dt.isoformat() + "Z" 
+        
+        repair_data = {
+            "car_id": int(car_id),
+            "start_rep": start_rep_iso,
+            "price_rep": float(price_rep),
+        }
+        
+        # Отправка в FastAPI
+        if headers:
+            response = requests.post(
+                f"{FASTAPI_BASE_URL}/repair/create_repair",
+                json=repair_data,
+                headers=headers,
+                timeout=10
+            )
+            
+            if response.ok:
+                messages.success(request, "Автомобиль отправлен в ремонт")
+            else:
+                messages.error(request, f"Ошибка: {response.json().get('detail', 'Неизвестная ошибка')}")
+        
+    return redirect('home')
+
+
+def complete_repair(request, repair_id):
+    headers = get_headers(request)
+
+    if request.method != 'POST':
+        return redirect('home')
+
+    end_rep = request.POST.get('end_rep')
+    if not end_rep:
+        messages.error(request, 'Укажите дату завершения ремонта')
+        return redirect('home')
+
+    # Преобразуем datetime-local в ISO-формат, который ожидает FastAPI
+    try:
+        from datetime import datetime
+        dt = datetime.strptime(end_rep, "%Y-%m-%dT%H:%M")
+        end_rep_iso = dt.isoformat() + "Z"  # Например: 2026-05-12T15:00:00Z
+    except ValueError:
+        messages.error(request, 'Неверный формат даты')
+        return redirect('home')
+
+    patch_data = {
+        'end_rep': end_rep_iso
+    }
+
+    if headers:
+        try:
+            response = requests.patch(
+                f'{FASTAPI_BASE_URL}/repairs/complete_repair?repair_id={repair_id}',
+                json=patch_data,
+                timeout=10,
+                headers=headers
+            )
+            if response.status_code == 200:
+                messages.success(request, f'Ремонт #{repair_id} завершён')
+            else:
+                error_detail = response.json().get('detail', 'Неизвестная ошибка')
+                messages.error(request, f'Ошибка: {error_detail}')
+        except requests.exceptions.ConnectionError:
+            messages.error(request, 'Не удалось подключиться к серверу FastAPI')
+        except Exception as e:
+            messages.error(request, f'Ошибка: {str(e)}')
+    else:
+        messages.error(request, 'Отсутствуют заголовки авторизации')
+
+    return redirect('home')
+
+
+def cancel_repair(request, repair_id):
+    headers = get_headers(request)
+
+    if request.method != 'POST':
+        return redirect('home')
+
+    if headers:
+        try:
+            response = requests.delete(
+                f'{FASTAPI_BASE_URL}/repair/delete_repair_by_id?repair_id={repair_id}',
+                json={},
+                timeout=10,
+                headers=headers
+            )
+            if response.status_code == 200:
+                messages.success(request, f'Ремонт #{repair_id} отменён')
+            else:
+                error_detail = response.json().get('detail', 'Неизвестная ошибка')
+                messages.error(request, f'Ошибка: {error_detail}')
+        except requests.exceptions.ConnectionError:
+            messages.error(request, 'Не удалось подключиться к серверу FastAPI')
+        except Exception as e:
+            messages.error(request, f'Ошибка: {str(e)}')
+    else:
+        messages.error(request, 'Отсутствуют заголовки авторизации')
+
     return redirect('home')

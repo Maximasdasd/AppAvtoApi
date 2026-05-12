@@ -87,6 +87,9 @@ class RepairController:
 
     def delete_repair_by_id(self, repair_id: int):
         repair_delete_list = self.db.execute(select(RepairModel).where(RepairModel.repair_id == repair_id)).scalars().first()
+        repair = self.db.get(RepairModel, repair_id)
+        car = self.db.get(СarsModel, repair.car_id)
+        car.is_available = CarStatus.AVAILABLE
         if repair_delete_list:
             repair_id_delete = self.db.execute(delete(RepairModel).where(RepairModel.repair_id==repair_id))
             self.db.commit()

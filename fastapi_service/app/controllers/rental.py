@@ -46,8 +46,8 @@ class RentalController:
 
             if rent_data.start_time:
                 start_time=rent_data.start_time
-                if rent_data.start_time > rent_data.end_time:
-                    timedelta = rent_data.start_time - rent_data.end_time
+                if rent_data.start_time < rent_data.end_time:
+                    timedelta = rent_data.end_time - rent_data.start_time
                     total_hours = timedelta.total_seconds()/3600
                     total_minutes = total_hours * 60
                     if total_hours < 1:
@@ -56,7 +56,7 @@ class RentalController:
                     raise HTTPException(status_code=400, detail="время конца аренды должно быть больше чем время начала аренды")
             else:
                 start_time = datetime.now(timezone.utc)
-                timedelta = start_time - rent_data.end_time
+                timedelta =rent_data.end_time - start_time
                 # можно запустить ассинхронный таймер с обратным отсчетом чтобы смотреть сколько осталось времени
                 # или рассчитывать сколько осталось времени вычетая сейчас от даты конца аренды
                 total_hours = timedelta.total_seconds()/3600

@@ -207,7 +207,7 @@
         <div class="section-header">
           <span class="section-title">Ремонты</span>
           <span class="section-meta">GET /get_repair_all</span>
-          <a href="/repairs/create" class="btn btn-ghost btn-sm">
+          <a href="#" onclick="openRepairModal()" class="btn btn-ghost btn-sm">
             <svg class="icon" viewBox="0 0 24 24" style="width:13px;height:13px"><path d="M12 5v14M5 12h14"/></svg>
           </a>
         </div>
@@ -239,9 +239,14 @@
                   <td>
                     {% if repair.end_rep == null %}
                     <!-- Завершить ремонт -->
-                    <form method="post" action="/repairs/{{ repair.id }}/complete" style="display:inline">
+                    <form method="delete" style="display:inline">
                       {% csrf_token %}
-                      <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--green)">✓</button>
+                      <div class="table-actions">
+                        <!-- Кнопка "Завершить" – открывает модалку -->
+                        <button type="button" onclick="openCompleteRepairModal('{{ repair.repair_id }}')" class="btn btn-ghost btn-sm" style="color:var(--green)">✓</button>
+                        <!-- Кнопка "Отменить" – открывает модалку -->
+                        <button type="button" onclick="openCancelRepairModal('{{ repair.repair_id }}')" class="btn btn-ghost btn-sm" style="color:var(--red)">✕</button>
+                      </div>
                     </form>
                     {% endif %}
 
@@ -391,7 +396,6 @@
 </div>
 </div>
 
-
 <script>
   // вкл\выкл модального окна
   function openRentalModal() {
@@ -403,6 +407,134 @@
   }
 </script>
 <!-- конец модального окна аренды -->
+
+
+<!-- ===== МОДАЛЬНОЕ ОКНО ДЛЯ РЕМОНТА ===== -->
+<div style="display:none" id="repairModal" class="modal-overlay">
+  <div style="max-width:600px;margin:28px auto">
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">Отправить в ремонт</span>
+        <span class="section-meta">POST /repairs/create</span>
+      </div>
+
+      <div style="padding:20px 24px">
+        <form method="post" action="/repair/create_repair">
+          {% csrf_token %}
+          
+          <div class="form-group">
+            <label>Автомобиль</label>
+            <select name="car_id" required>
+              <option value="">— Выберите автомобиль —</option>
+              {% for car in cars %}
+                <option value="{{ car.car_id }}">
+                  {{ car.brand }} {{ car.model }} · {{ car.number_car }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Дата и время начала ремонта</label>
+            <input type="datetime-local" name="start_rep" required>
+          </div>
+
+          <div class="form-group">
+            <label>Стоимость ремонта (₽)</label>
+            <input type="number" step="0.01" name="price_rep" placeholder="0" required>
+          </div>
+
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+            <a href="#" onclick="closeRepairModal(); return false;" class="btn btn-ghost">Отмена</a>
+            <button type="submit" onclick="closeRepairModal()" class="btn btn-primary">Отправить в ремонт</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openRepairModal() {
+    document.getElementById('repairModal').style.display = 'flex';
+  }
+  
+  function closeRepairModal() {
+    document.getElementById('repairModal').style.display = 'none';
+  }
+</script>
+
+<!-- конец модального окна -->
+
+<!--модальное окно ремонта завершения и начала -->
+<div style="display:none" id="completeRepairModal" class="modal-overlay">
+  <div class="modal" style="width: 450px;">
+    <div class="modal-header">
+      <div class="modal-title">Завершить ремонт</div>
+      <div class="modal-close" onclick="closeCompleteRepairModal()">✕</div>
+    </div>
+    <div style="padding: 20px;">
+      <form method="post" action="repair/delete_repair_by_id" id="completeRepairForm">
+        {% csrf_token %}
+        <input type="hidden" name="repair_id" id="complete_repair_id">
+        <div class="form-group">
+          <label>Дата завершения</label>
+          <input type="datetime-local" name="end_rep" required>
+        </div>
+        <div class="form-actions" style="margin-top: 16px;">
+          <button type="button" class="btn btn-ghost" onclick="closeCompleteRepairModal()">Отмена</button>
+          <button type="submit" class="btn btn-primary">Завершить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно для ОТМЕНЫ ремонта -->
+<div style="display:none" id="cancelRepairModal" class="modal-overlay">
+  <div class="modal" style="width: 400px;">
+    <div class="modal-header">
+      <div class="modal-title">Отменить ремонт</div>
+      <div class="modal-close" onclick="closeCancelRepairModal()">✕</div>
+    </div>
+    <div style="padding: 20px;">
+      <form method="post" action="repairs/complete_repair" id="cancelRepairForm">
+        {% csrf_token %}
+        <input type="hidden" name="repair_id" id="cancel_repair_id">
+        <p>Вы уверены, что хотите отменить ремонт?</p>
+        <div class="form-actions">
+          <button type="button" class="btn btn-ghost" onclick="closeCancelRepairModal()">Нет</button>
+          <button type="submit" class="btn btn-danger">Да, отменить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openCompleteRepairModal(repairId) {
+    const form = document.getElementById('completeRepairForm');
+    form.action = `/repair/complete_repair/${repairId}`;  // эндпоинт для PATCH
+    form.method="patch"
+    document.getElementById('complete_repair_id').value = repairId;
+    document.getElementById('completeRepairModal').style.display = 'flex';
+  }
+  function closeCompleteRepairModal() {
+    document.getElementById('completeRepairModal').style.display = 'none';
+  }
+  
+  function openCancelRepairModal(repairId) {
+    const form = document.getElementById('cancelRepairForm');
+    form.action = `/repair/delete_repair_by_id/${repairId}`;
+    form.method="delete"
+    document.getElementById('cancel_repair_id').value = repairId;
+    document.getElementById('cancelRepairModal').style.display = 'flex';
+  }
+  function closeCancelRepairModal() {
+    document.getElementById('cancelRepairModal').style.display = 'none';
+  }
+</script>
+<!-- конец модального окна ремонта завершения  и начлаа-->
 
 
 <!-- модальное окно деталей -->
