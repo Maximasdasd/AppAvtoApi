@@ -219,6 +219,8 @@
                 <th>ID</th>
                 <th>Авто</th>
                 <th>Цена</th>
+                <th>Начало<br>
+                  аренды</th>
                 <th>Статус</th>
                 <th></th>
               </tr>
@@ -229,6 +231,7 @@
                   <td class="td-mono">#{{ repair.repair_id }}</td>
                   <td class="td-mono">{{ repair.car.brand }} #{{ repair.car_id }}</td>
                   <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ repair.price_rep }}</td>
+                  <td>{{ repair.start_rep }}</td>
                   <td>
                     {% if repair.end_rep == null %}
                       <span class="badge badge-amber">В процессе</span>
@@ -474,7 +477,7 @@
       <div class="modal-close" onclick="closeCompleteRepairModal()">✕</div>
     </div>
     <div style="padding: 20px;">
-      <form method="post" action="repair/delete_repair_by_id" id="completeRepairForm">
+      <form method="post" id="completeRepairForm">
         {% csrf_token %}
         <input type="hidden" name="repair_id" id="complete_repair_id">
         <div class="form-group">
@@ -498,7 +501,7 @@
       <div class="modal-close" onclick="closeCancelRepairModal()">✕</div>
     </div>
     <div style="padding: 20px;">
-      <form method="post" action="repairs/complete_repair" id="cancelRepairForm">
+      <form method="post" id="cancelRepairForm">
         {% csrf_token %}
         <input type="hidden" name="repair_id" id="cancel_repair_id">
         <p>Вы уверены, что хотите отменить ремонт?</p>
@@ -514,8 +517,7 @@
 <script>
   function openCompleteRepairModal(repairId) {
     const form = document.getElementById('completeRepairForm');
-    form.action = `/repair/complete_repair/${repairId}`;  // эндпоинт для PATCH
-    form.method="patch"
+    form.action = `/repairs/complete_repair/${repairId}`;  // эндпоинт для PATCH
     document.getElementById('complete_repair_id').value = repairId;
     document.getElementById('completeRepairModal').style.display = 'flex';
   }
@@ -525,8 +527,7 @@
   
   function openCancelRepairModal(repairId) {
     const form = document.getElementById('cancelRepairForm');
-    form.action = `/repair/delete_repair_by_id/${repairId}`;
-    form.method="delete"
+    form.action = `/repairs/delete_repair_by_id/${repairId}`;
     document.getElementById('cancel_repair_id').value = repairId;
     document.getElementById('cancelRepairModal').style.display = 'flex';
   }

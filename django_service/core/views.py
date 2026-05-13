@@ -130,7 +130,6 @@ def dashboard(request):
     try:
         data_repair = get_fastapi(request, 'repair/get_repair_all')
         context['repairs'] = data_repair['items']
-        print(data_repair['items'])
     except Exception as e:
         print(f"Исключение при запросе к FastAPI: {e}")
         context["repairs"] = []
@@ -289,7 +288,7 @@ def complete_repair(request, repair_id):
     if headers:
         try:
             response = requests.patch(
-                f'{FASTAPI_BASE_URL}/repairs/complete_repair?repair_id={repair_id}',
+                f'{FASTAPI_BASE_URL}/repair/complete_repair?repair_id={repair_id}',
                 json=patch_data,
                 timeout=10,
                 headers=headers
