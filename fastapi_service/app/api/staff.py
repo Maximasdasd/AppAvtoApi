@@ -167,4 +167,4 @@ def info_me(request: Request, token: str = Depends(oauth2_scheme),
 
         })
     payload = controller.info_me(token)
-    return f'Аккаунт c username: {payload["sub"]}, role: {payload["roles"]}........{payload}'
+    return payload

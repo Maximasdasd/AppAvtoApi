@@ -57,7 +57,6 @@ class RepairController:
             # .replace(tzinfo=timezone.utc) нужен для того чтобы привести к одному формату даты тк из бд достается другой формат даты
             timedelta = repairComplete_data.end_rep - search_repair.start_rep.replace(tzinfo=timezone.utc)
             total_hours = timedelta.total_seconds()/3600
-            print(total_hours)
             if total_hours > 0:
                 search_repair.end_rep = repairComplete_data.end_rep
                 car_is_repair = self.db.get(СarsModel, search_repair.car_id)
