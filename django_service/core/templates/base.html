@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
+
 <aside class="sidebar">
   <div class="logo">
     <div class="logo-icon">🚗</div>
@@ -22,7 +23,7 @@
   <nav>
     <div class="nav-section">Главное</div>
  
-    <a href="/dashboard" class="nav-link active">
+    <a href="/dashboard" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
       <svg class="nav-icon icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
       Дашборд
     </a>
@@ -30,45 +31,41 @@
     <div class="nav-section">Каталог</div>
  
     <!-- GET /get_cars_all -->
-    <a href="/cars" class="nav-link">
+    <a href="/cars" class="nav-link {% if request.resolver_match.url_name == 'cars' %}active{% endif %}">
       <svg class="nav-icon icon" viewBox="0 0 24 24"><path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h14l4 4v4a2 2 0 01-2 2h-2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
       Автомобили
-      <span class="nav-badge">#</span>
     </a>
  
     <!-- GET /get_clients_all -->
-    <a href="/clients" class="nav-link">
+    <a href="/clients" class="nav-link {% if request.resolver_match.url_name == 'clients' %}active{% endif %}">
       <svg class="nav-icon icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
       Клиенты
-      <span class="nav-badge">#</span>
     </a>
  
     <div class="nav-section">Операции</div>
  
     <!-- GET /get_rental_all -->
-    <a href="/rentals" class="nav-link">
+    <a href="/rentals" class="nav-link {% if request.resolver_match.url_name == 'rentals' %}active{% endif %}">
       <svg class="nav-icon icon" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
       Аренды
-      <span class="nav-badge">#</span>
     </a>
  
     <!-- GET /get_repair_all -->
-    <a href="/repairs" class="nav-link">
+    <a href="/repairs" class="nav-link {% if request.resolver_match.url_name == 'repairs' %}active{% endif %}">
       <svg class="nav-icon icon" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
       Ремонты
-      <span class="nav-badge">#</span>
     </a>
  
     <div class="nav-section">Система</div>
  
     <!-- GET /get_staff_all — только admin -->
-    <a href="/staff" class="nav-link">
+    <a href="/staff" class="nav-link {% if request.resolver_match.url_name == 'staff' %}active{% endif %}" >
       <svg class="nav-icon icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       Сотрудники
     </a>
  
     <!-- GET /info_me -->
-    <a href="/me" class="nav-link">
+    <a href="/infome" class="nav-link {% if request.resolver_match.url_name == 'infome' %}active{% endif %}">
       <svg class="nav-icon icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>
       Мой аккаунт
     </a>
@@ -78,14 +75,23 @@
     <div class="user-chip">
       <div class="avatar">АД</div>
       <div>
-        <div class="user-name">admin_user</div>
-        <div class="user-role">admin</div>
+        <div class="user-name">{{ username }}</div>
+        <div class="user-role">{{ role }}</div>
       </div>
     </div>
   </div>
 </aside>
 <div class="main">
- 
+{% if messages %}
+<div class="messages-container">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+        <span class="alert-text">{{ message }}</span>
+        <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
   <!-- ===== TOPBAR ===== -->
     {% block topbar %}
     {% endblock %}

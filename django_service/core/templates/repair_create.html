@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Создание ремонта | AutoFleet{% endblock %}
+
+{% block topbar %}
+  <header class="topbar">
+    <div class="topbar-crumb">
+      AutoFleet <span>/ Создание ремонта</span>
+    </div>
+    <div style="flex:1"></div>
+    <div class="topbar-actions">
+      <!-- POST /login_staff / logout -->
+      <a href="/login_staff/" class="btn btn-ghost btn-sm">Выйти</a>
+    </div>
+  </header>
+{% endblock topbar %}
+
+{% block content %}
+<div style="max-width:600px; margin:0 auto;">
+    <div class="section">
+        <div class="section-header">
+            <span class="section-title">Отправить автомобиль в ремонт</span>
+            <span class="section-meta">POST /create_repair</span>
+        </div>
+        <div style="padding:20px 24px">
+            <form method="post" action="{% url 'repairs_create' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Автомобиль</label>
+                    <select name="car_id" required>
+                        <option value="">— Выберите автомобиль —</option>
+                        {% for car in cars_for_repair %}
+                        <option value="{{ car.id }}">
+                            {{ car.brand }} {{ car.model }} · {{ car.license_plate }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-hint">Показаны автомобили, не находящиеся в ремонте</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Описание неисправности</label>
+                    <textarea name="description" placeholder="Опишите проблему подробно..." required style="min-height:120px;"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Ожидаемая дата завершения</label>
+                        <input type="date" name="expected_date">
+                    </div>
+                    <div class="form-group">
+                        <label>Приоритет</label>
+                        <select name="priority">
+                            <option value="normal">Обычный</option>
+                            <option value="high">Высокий</option>
+                            <option value="urgent">Срочный</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Дополнительная информация</label>
+                    <textarea name="notes" placeholder="Любая дополнительная информация..."></textarea>
+                </div>
+                
+                <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+                    <a href="{% url 'repairs' %}" class="btn btn-ghost">Отмена</a>
+                    <button type="submit" class="btn btn-primary">Создать заявку</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock content %} 

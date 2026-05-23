@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Профиль | AutoFleet{% endblock %}
+
+{% block topbar %}
+  <header class="topbar">
+    <div class="topbar-crumb">
+      AutoFleet <span>/ Профиль</span>
+    </div>
+    <div style="flex:1"></div>
+    <div class="topbar-actions">
+      <!-- POST /login_staff / logout -->
+      <a href="/login_staff/" class="btn btn-ghost btn-sm">Выйти</a>
+    </div>
+  </header>
+{% endblock topbar %}
+
+{% block content %}
+<div style="max-width:800px; margin:0 auto;">
+    <div class="detail-card" style="margin-bottom:24px;">
+        <div class="detail-header">
+            <div class="detail-name">{{ username }}</div>
+            <div class="detail-id">Права(Роль): {% if role == 'admin' %}Администратор{% else %}Менеджер{% endif %}</div>
+        </div>
+        <div class="detail-fields">
+            <div class="detail-row"><span class="detail-key">Email</span><span class="detail-val">{{ email }}</span></div>
+            <div class="detail-row"><span class="detail-key">Полное имя</span><span class="detail-val">{{ full_name }}</span></div>
+            <div class="detail-row"><span class="detail-key">Должность</span><span class="detail-val">{{ position }}</span></div>
+            <div class="detail-row"><span class="detail-key">ID</span><span class="detail-val">{{ staff_id }}</span></div>
+        </div>
+    </div>
+
+    {# Список аренд, созданных этим сотрудником (если менеджер) #}
+    <div class="section">
+        <div class="section-header"><span class="section-title">Мои оформленные аренды</span></div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>ID</th><th>Клиент</th><th>Авто</th><th>Период</th><th>Статус</th></tr></thead>
+                <tbody>
+                    {% for rent in my_rentals.items %}
+                    <tr>
+                    <td class="td-mono">#{{ rent.rental_id }}</td>
+                    <td>{{ rent.client_id }}</td>
+                    <td>{{ rent.car_id }}</td>
+                    <td class="td-mono">{{ rent.start_time }} - {{ rent.end_time }}</td>
+                    <td>{% if rent.end_time %}Завершена{% else %}В аренде{% endif %}</td>
+                </tr>
+                    {% empty %}<tr><td colspan="5">Вы ещё не оформляли аренды</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock content %} 

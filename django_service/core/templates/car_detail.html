@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Детали авто | AutoFleet{% endblock %}
+
+{% block topbar %}
+  <header class="topbar">
+    <div class="topbar-crumb">
+      AutoFleet <span>/ Детали авто</span>
+    </div>
+    <div style="flex:1"></div>
+    <div class="topbar-actions">
+      <!-- POST /login_staff / logout -->
+      <a href="/login_staff/" class="btn btn-ghost btn-sm">Выйти</a>
+    </div>
+  </header>
+{% endblock topbar %}
+
+{% block content %}
+<div class="detail-grid">
+    <div class="detail-card">
+        <div class="detail-header">
+            <div class="detail-id">#{{ car.car_id }}</div>
+            <div class="detail-name">{{ car.brand }}</div>
+            <div class="detail-sub">{{ car.number_car }}</div>
+        </div>
+        <div class="detail-fields">
+            <div class="detail-row"><span class="detail-key">Год выпуска</span><span class="detail-val">{{ car.year }}</span></div>
+            <div class="detail-row"><span class="detail-key">Цена / день</span><span class="detail-val">{{ car.daily_price }} ₽</span></div>
+            <div class="detail-row"><span class="detail-key">Статус</span>
+                <span class="detail-val">
+                    {% if car.is_available == 'available' %}<span class="badge badge-green">Свободен</span>
+                    {% elif car.is_available == 'rented' %}<span class="badge badge-amber">В аренде</span>
+                    {% else %}<span class="badge badge-red">Ремонт</span>{% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <span class="section-title">История аренд</span>
+            <span class="section-meta">GET /rentals/bycar/{{ car.id }}</span>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Клиент</th><th>Начало</th><th>Конец</th><th>Статус</th><th></th></tr></thead>
+                <tbody>
+                    {% for rent in car_rentals.items %}
+                    <tr>
+                        <td class="td-primary">{{ rent.client_id }}</td>
+                        <td class="td-mono">{{ rent.start_time }}</td>
+                        <td class="td-mono">{{ rent.end_time }}</td>
+                        <td>{% if rent.status_rent == 'ACTIVE' %}<span class="badge badge-green">Активна</span>{% else %}<span class="badge badge-blue">Завершена</span>{% endif %}</td>
+                        <td><a href="{% url 'rentals_detail' rent.rental_id %}" class="btn btn-ghost btn-sm">Детали</a></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5"><div class="empty">Нет записей об арендах</div></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div style="margin-top:20px; display:flex; gap:8px; justify-content:flex-end">
+    <a href="{% url 'cars' %}" class="btn btn-ghost">Назад</a>
+    
+    {% if car.is_available == 'available' %}
+    <form method="post" action="{% url 'car_delete' car.car_id %}" style="display:inline" onsubmit="return confirm('Вы уверены, что хотите удалить автомобиль {{ car.brand }} {{ car.number_car }}? Это действие нельзя отменить.');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Удалить автомобиль</button>
+    </form>
+    {% else %}
+    <button class="btn btn-danger" disabled style="opacity:0.5; cursor:not-allowed" title="Нельзя удалить автомобиль, который находится в аренде или ремонте">Удалить автомобиль</button>
+    {% endif %}
+</div>
+{% endblock content %} 

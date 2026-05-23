@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Ремонт | AutoFleet{% endblock %}
+
+{% block topbar %}
+  <header class="topbar">
+    <div class="topbar-crumb">
+      AutoFleet <span>/ Ремонт</span>
+    </div>
+    <div style="flex:1"></div>
+    <div class="topbar-actions">
+      <!-- POST /login_staff / logout -->
+      <a href="/login_staff/" class="btn btn-ghost btn-sm">Выйти</a>
+    </div>
+  </header>
+{% endblock topbar %}
+
+{% block content %}
+<div class="section">
+    <div class="section-header">
+        <span class="section-title">Заявки на ремонт</span>
+        <a href="{% url 'repairs_create' %}" class="btn btn-primary btn-sm">+ Отправить в ремонт</a>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>ID</th><th>Автомобиль</th><th>Описание</th><th>Начало ремонта</th><th>Конец ремонта</th><th>Действия</th></tr></thead>
+            <tbody>
+                {% for repair in repairs.items %}
+                <tr>
+                    <td class="td-mono">#{{ repair.repair_id }}</td>
+                    <td class="td-primary">{{ repair.car_id }}</td>
+                    <td>{% if repair.end_rep == None %}<span class="badge badge-amber">В процессе</span>
+                        {% else %}<span class="badge badge-blue">Завершён</span>{% endif %}</td>
+                    <td class="td-mono">{{ repair.start_rep }}</td>
+                    <td class="td-mono">{{ repair.end_rep }}</td>
+                    <td><div class="table-actions">
+                        <a href="{% url 'repairs_detail' repair.repair_id %}" class="btn btn-ghost btn-sm">Детали</a>
+                        {% if repair.end_rep == None %}
+                        <form method="post" action="{% url 'repair_complete' repair.repair_id %}">
+                            {% csrf_token %}<button type="submit" class="btn btn-ghost btn-sm" style="color:var(--green)">✓ Завершить</button>
+                        </form>
+                        {% endif %}
+                    </div></td>
+                </tr>
+                {% empty %}<tr><td colspan="6"><div class="empty">Нет ремонтных заявок</div></td></tr>{% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock content %} 

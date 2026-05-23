@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 import requests
+from django.shortcuts import render, redirect
 
 FASTAPI_BASE_URL = "http://127.0.0.1:8000"
 
@@ -25,11 +26,13 @@ def get_headers(request):
 
 def auto_login_to_fastapi(request):
     login_url = f"{FASTAPI_BASE_URL}/staff/login_staff"
-    
+    username = request.POST.get('username')
+    password = request.POST.get('password')
     # Отправляем как form-data (как HTML-форма)
     resp = requests.post(
         login_url,
-        data={"username": "qweqwe", "password": "qwerty"},
+        data={"username": username, "password": password},
+        # data={"username": "qweqwe", "password": "qwerty"},
         timeout=5,
     )
     
@@ -46,5 +49,5 @@ def auto_login_to_fastapi(request):
         )
         if token:
             request.session["fastapi_token"] = token
-            return True
-    return False
+            return redirect('home')
+    return render(request, 'login.html')

@@ -1,0 +1,49 @@
+<!-- -->
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutoFleet — login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<div id="tmpl-login">
+<!-- {% block login_page %} -->
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-icon">🚗</div>
+      <div>
+        <div class="logo-text">AutoFleet</div>
+        <div class="logo-sub">Система управления</div>
+      </div>
+    </div>
+ 
+    <div class="login-title">Вход в систему</div>
+    <div class="login-sub">Введите данные вашей учётной записи</div>
+ 
+    <!-- В Django это будет form.action = /login_staff (отправляет в FastAPI через прокси) -->
+    <form method="post" action="/login_staff/">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="username">Логин</label>
+        <input type="text" id="username" name="username" placeholder="admin_user" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label for="password">Пароль</label>
+        <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:10px">
+        Войти
+      </button>
+    </form>
+    <div class="login-footer">POST /login_staff · OAuth2PasswordRequestForm</div>
+  </div>
+</div>
+<!-- {% endblock login_page %} -->
+</div>
+ 

@@ -506,10 +506,103 @@
     font-family: var(--mono);
   }
   /* {% endblock modal %} */
- 
+ /* ошибка */
+ /* Контейнер для сообщений */
+.messages-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 350px;
+}
+
+/* Стиль сообщения */
+.alert {
+    position: relative;
+    padding: 12px 40px 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin: 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    animation: slideIn 0.3s ease-out;
+}
+
+/* Анимация появления */
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Цвета для разных типов сообщений */
+.alert-success {
+    background: #0d2e24;
+    color: #2dd4a0;
+    border: 1px solid rgba(45,212,160,0.3);
+}
+
+.alert-error, .alert-danger {
+    background: #2a0d0d;
+    color: #ff5c5c;
+    border: 1px solid rgba(255,92,92,0.3);
+}
+
+.alert-warning {
+    background: #2a1e06;
+    color: #f5a623;
+    border: 1px solid rgba(245,166,35,0.3);
+}
+
+.alert-info {
+    background: rgba(79,125,255,0.1);
+    color: #4f7dff;
+    border: 1px solid rgba(79,125,255,0.3);
+}
+
+/* Кнопка закрытия */
+.alert-close {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: currentColor;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    opacity: 0.6;
+    transition: all 0.2s;
+}
+
+.alert-close:hover {
+    opacity: 1;
+    background: rgba(255,255,255,0.1);
+}
+
+/* Текст сообщения */
+.alert-text {
+    display: block;
+    line-height: 1.4;
+}
   /* === LOGIN === */
   /* {% block login %} */
   .login-page {
+    width: 100vw;
     min-height: 100vh;
     background: var(--bg);
     display: flex;

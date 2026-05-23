@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Детали клиента | AutoFleet{% endblock %}
+
+{% block topbar %}
+  <header class="topbar">
+    <div class="topbar-crumb">
+      AutoFleet <span>/ Детали клиента</span>
+    </div>
+    <div style="flex:1"></div>
+    <div class="topbar-actions">
+      <!-- POST /login_staff / logout -->
+      <a href="/login_staff/" class="btn btn-ghost btn-sm">Выйти</a>
+    </div>
+  </header>
+{% endblock topbar %}
+
+{% block content %}
+<div class="detail-grid">
+    <!-- Левая колонка - информация о клиенте -->
+    <div class="detail-card">
+        <div class="detail-header">
+            <div class="detail-id">Клиент #{{ client.client_id }}</div>
+            <div class="detail-name">{{ client.full_name }}</div>
+        </div>
+        <div class="detail-fields">
+            <div class="detail-row">
+                <span class="detail-key">Адрес</span>
+                <span class="detail-val">{{ client.address }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key">Активен</span>
+                <span class="detail-val">{{ client.is_active }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key">Паспорт</span>
+                <span class="detail-val">{{ client.passport }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key">Вод. удостоверение</span>
+                <span class="detail-val">{{ client.driver_license|default:"—" }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key">Дата регистрации</span>
+                <span class="detail-val">{{ client.created_at }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key">Всего аренд</span>
+                <span class="detail-val">{{ rentals.items|length }}</span>
+            </div>
+        </div>
+        <div style="padding:16px 20px; border-top:1px solid var(--border); display:flex; gap:8px;">
+            <a href="{% url 'clients' %}" class="btn btn-ghost btn-sm">Назад</a>
+            <form method="post" action="{% url 'client_delete' client.client_id %}" style="display:inline" onsubmit="return confirm('Удалить клиента? Это действие нельзя отменить.')">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm">Удалить клиента</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Правая колонка - история аренд -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-title">История аренд</span>
+            <span class="section-meta">GET /rentals/byclient/{{ client.id }}</span>
+            <a href="#" class="btn btn-primary btn-sm">
+                <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>
+                Новая аренда
+            </a>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Автомобиль ID</th>
+                        <th>Начало</th>
+                        <th>Конец</th>
+                        <th>Статус</th>
+                        <th>Стоимость</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rent in rentals.items %}
+                    <tr>
+                        <td class="td-mono">#{{ rent.rental_id }}</td>
+                        <td class="td-primary">{{ rent.car_id }}<br>
+                            <span class="td-mono" style="font-size:11px">{{ rent.car.license_plate }}</span>
+                        </td>
+                        <td class="td-mono">{{ rent.start_time }}</td>
+                        <td class="td-mono">{{ rent.end_time }}</td>
+                        <td>
+                                                      <!-- # ACTIVE = "active"
+                # COMPLETED = "completed"
+                # CANCELLED = "cancelled" -->
+                            {% if rent.status_rent == 'active' %}
+                                <span class="badge badge-green"><span class="dot dot-green"></span> Активна</span>
+                            {% elif rent.status_rent == 'completed' %}
+                                <span class="badge badge-blue">Завершена</span>
+                            {% else %}
+                                <span class="badge badge-red">Отменена</span>
+                            {% endif %}
+                        </td>
+                        <td class="td-mono">{{ rent.total_price }} ₽</td>
+                        <td>
+                            <a href="{% url 'rentals_detail' rent.rental_id %}" class="btn btn-ghost btn-sm">Детали</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty">
+                                <div class="empty-icon">📋</div>
+                                <div class="empty-text">Нет аренд</div>
+                                <div class="empty-sub">У этого клиента пока нет аренд</div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

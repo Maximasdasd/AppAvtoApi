@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Детали ремонта | AutoFleet{% endblock %}
+
+{% block topbar %}
+  <header class="topbar">
+    <div class="topbar-crumb">
+      AutoFleet <span>/ Детали ремонта</span>
+    </div>
+    <div style="flex:1"></div>
+    <div class="topbar-actions">
+      <!-- POST /login_staff / logout -->
+      <a href="/login_staff/" class="btn btn-ghost btn-sm">Выйти</a>
+    </div>
+  </header>
+{% endblock topbar %}
+
+{% block content %}
+<div class="detail-grid">
+    <!-- Левая колонка - информация о ремонте -->
+    <div class="detail-card">
+        <div class="detail-header">
+            <div class="detail-id">Заявка на ремонт #{{ repair.car_id }}</div>
+            <div class="detail-name">
+                {% if repair.end_rep == None %}
+                    <span class="badge badge-amber"><span class="dot dot-amber"></span> В процессе</span>
+                {% else %}
+                    <span class="badge badge-green"><span class="dot dot-green"></span> Завершён</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="detail-fields">
+            <div class="detail-row">
+                <span class="detail-key">Автомобиль</span>
+                <span class="detail-val">
+                    <a href="{% url 'car_detail' repair.car_id %}" style="color:var(--accent); text-decoration:none;">
+                        {{ repair.car_id}}
+                    </a>
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key">Создана</span>
+                <span class="detail-val">{{ repair.start_rep }}</span>
+            </div>
+            {% if repair.end_rep %}
+            <div class="detail-row">
+                <span class="detail-key">Завершён</span>
+                <span class="detail-val">{{ repair.end_rep}}</span>
+            </div>
+            {% endif %}
+        </div>
+        
+        {% if repair.end_rep == None %}
+        <div style="padding:16px 20px; border-top:1px solid var(--border); display:flex; gap:8px;">
+            <form method="post" action="{% url 'repair_complete' repair.repair_id %}" style="display:inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary" style="background:var(--green);" 
+                        onclick="return confirm('Завершить ремонт?')">
+                    ✓ Завершить ремонт
+                </button>
+            </form>
+            {% if user.role == 'admin' %}
+            <form method="post" action="{% url 'repair_delete' repair.repair_id %}" style="display:inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger" 
+                        onclick="return confirm('Удалить заявку на ремонт?')">
+                    Удалить
+                </button>
+            </form>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <div style="padding:16px 20px; border-top:1px solid var(--border); display:flex; gap:8px;">
+            <a href="{% url 'repairs' %}" class="btn btn-ghost btn-sm">← Назад к списку</a>
+            {% if repair.end_rep is None and role == 'admin' %}
+            <form method="post" action="{% url 'repairs_delete' repair.repair_id %}" style="display:inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm" 
+                        onclick="return confirm('Удалить заявку?')">Удалить</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Правая колонка - статус автомобиля -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-title">Статус автомобиля</span>
+        </div>
+        <div style="padding:20px;">
+            {% if repair.end_rep == None %}
+            <div class="alert alert-warning" style="background:var(--amber-bg); color:var(--amber); border-color:rgba(245,166,35,0.3);">
+                <strong>● Автомобиль в ремонте</strong><br>
+                Автомобиль находится в ремонте и недоступен для аренды.
+            </div>
+            {% else %}
+            <div class="alert alert-success" style="background:var(--green-bg); color:var(--green); border-color:rgba(45,212,160,0.3);">
+                <strong>✓ Ремонт завершён</strong><br>
+                Автомобиль снова доступен для аренды.
+            </div>
+            {% endif %}
+            
+            <div style="margin-top:16px;">
+                <a href="{% url 'car_detail' repair.car_id %}" class="btn btn-ghost btn-sm" style="width:100%; text-align:center;">
+                    Перейти к автомобилю →
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %} 

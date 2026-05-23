@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Клиенты | AutoFleet{% endblock %}
+
+{% block topbar %}
+  <header class="topbar">
+    <div class="topbar-crumb">
+      AutoFleet <span>/ Клиенты</span>
+    </div>
+    <div style="flex:1"></div>
+    <div class="topbar-actions">
+      <!-- POST /login_staff / logout -->
+      <a href="/login_staff/" class="btn btn-ghost btn-sm">Выйти</a>
+    </div>
+  </header>
+{% endblock topbar %}
+
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-label">Всего клиентов</div>
+        <div class="stat-value">{{ clients_total }}</div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="section-header">
+        <span class="section-title">Клиенты</span>
+        <span class="section-meta">GET /get_clients_all</span>
+        <div style="display:flex; gap:12px;">
+            <!-- Форма поиска -->
+            <form method="get" action="" style="display: flex; gap: 8px;">
+                <div style="position: relative;">
+                    <svg class="search-icon icon" viewBox="0 0 24 24" width="14" height="14" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%);">
+                        <circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/>
+                    </svg>
+                    <input type="text" name="search" class="search-input" placeholder="Поиск по ФИО или телефону" 
+                           value="{{ request.GET.search|default:'' }}" 
+                           style="padding-left: 34px; width: 220px;">
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm">Найти</button>
+                {% if request.GET.search %}
+                <a href="?" class="btn btn-ghost btn-sm">Сбросить</a>
+                {% endif %}
+            </form>
+            
+            <a href="{% url 'client_create' %}" class="btn btn-primary btn-sm">
+                <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>
+                Новый клиент
+            </a>
+        </div>
+    </div>
+    
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>ФИО</th>
+                    <th>Номер прав</th>
+                    <th>Активен</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for client in clients.items %}
+                <tr>
+                    <td class="td-mono">#{{ client.client_id }}</td>
+                    <td class="td-primary">{{ client.full_name }}</td>
+                    <td class="td-mono">{{ client.driver_license }}</td>
+                    <td class="td-mono">{{ client.is_active }}</td>
+                    <td>
+                        <div class="table-actions">
+                            <a href="{% url 'client_detail' client.client_id %}" class="btn btn-ghost btn-sm">Детали</a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6">
+                        <div class="empty">
+                            <div class="empty-icon">👥</div>
+                            <div class="empty-text">Клиенты не найдены</div>
+                            <div class="empty-sub">
+                                {% if request.GET.search %}
+                                    Попробуйте изменить поисковый запрос
+                                {% else %}
+                                    Добавьте первого клиента
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock content %} 

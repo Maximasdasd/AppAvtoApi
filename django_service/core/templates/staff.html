@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Сотрудники | AutoFleet{% endblock %}
+
+{% block topbar %}
+  <header class="topbar">
+    <div class="topbar-crumb">
+      AutoFleet <span>/ Сотрудники</span>
+    </div>
+    <div style="flex:1"></div>
+    <div class="topbar-actions">
+      <!-- POST /login_staff / logout -->
+      <a href="/login_staff/" class="btn btn-ghost btn-sm">Выйти</a>
+    </div>
+  </header>
+{% endblock topbar %}
+
+{% block content %}
+<div class="section">
+    <div class="section-header">
+        <span class="section-title">Сотрудники системы</span>
+        <span class="section-meta">GET /get_staff_all</span>
+        {% if user.is_admin %}
+        <a href="{% url 'staff_create' %}" class="btn btn-primary btn-sm">+ Создать сотрудника</a>
+        {% endif %}
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>ID</th><th>Username</th><th>Роль</th><th>Дата создания</th><th>Действия</th></tr></thead>
+            <tbody>
+                {% for staff in staff_list %}
+                <tr>
+                    <td class="td-mono">#{{ staff.id }}</td>
+                    <td class="td-primary">{{ staff.username }}</td>
+                    <td>{% if staff.role == 'admin' %}<span class="badge badge-red">admin</span>{% else %}<span class="badge badge-amber">manager</span>{% endif %}</td>
+                    <td class="td-mono">{{ staff.created_at|date:"d.m.Y" }}</td>
+                    <td><div class="table-actions">
+                        <a href="{% url 'staff_detail' staff.id %}" class="btn btn-ghost btn-sm">Профиль</a>
+                        {% if user.is_admin and staff.id != user.id %}
+                        <form method="post" action="{% url 'staff_delete' staff.id %}" style="display:inline">
+                            {% csrf_token %}<button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Удалить сотрудника?')">Удалить</button>
+                        </form>
+                        {% endif %}
+                    </div></td>
+                </tr>
+                {% empty %}<tr><td colspan="5">Нет сотрудников</td></tr>{% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock content %} 

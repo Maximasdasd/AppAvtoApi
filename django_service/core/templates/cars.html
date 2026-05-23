@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Автомобили | AutoFleet{% endblock %}
+
+{% block topbar %}
+  <header class="topbar">
+    <div class="topbar-crumb">
+      AutoFleet <span>/ Автомобили</span>
+    </div>
+    <div style="flex:1"></div>
+    <div class="topbar-actions">
+      <!-- POST /login_staff / logout -->
+      <a href="/login_staff/" class="btn btn-ghost btn-sm">Выйти</a>
+    </div>
+  </header>
+{% endblock topbar %}
+
+{% block content %}
+<div class="section">
+    <div class="section-header">
+        <span class="section-title">Автомобили</span>
+        <span class="section-meta">GET /get_cars_all</span>
+        <div style="display:flex; gap:12px; flex-wrap: wrap;">
+            <!-- Форма поиска -->
+            <form method="get" action="" style="display: flex; gap: 8px;">
+                <div style="position: relative;">
+                    <svg class="search-icon icon" viewBox="0 0 24 24" width="14" height="14" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%);">
+                        <circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/>
+                    </svg>
+                    <input type="text" name="search" class="search-input" placeholder="Поиск по гос. номеру или модели" 
+                           value="{{ request.GET.search|default:'' }}" 
+                           style="padding-left: 34px; width: 220px;">
+                </div>
+                
+                <!-- Сохраняем фильтр статуса при поиске -->
+                {% if request.GET.status %}
+                <input type="hidden" name="status" value="{{ request.GET.status }}">
+                {% endif %}
+                
+                <button type="submit" class="btn btn-primary btn-sm">Найти</button>
+                
+                {% if request.GET.search %}
+                <a href="?{% if request.GET.status %}status={{ request.GET.status }}{% endif %}" class="btn btn-ghost btn-sm">Очистить</a>
+                {% endif %}
+            </form>
+            
+            <!-- Фильтр по статусу -->
+            <div class="tabs">
+                <a href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}" 
+                   class="tab {% if not request.GET.status %}active{% endif %}">Все</a>
+                <a href="?status=free{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" 
+                   class="tab {% if request.GET.status == 'free' %}active{% endif %}">Свободны</a>
+                <a href="?status=rented{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" 
+                   class="tab {% if request.GET.status == 'rented' %}active{% endif %}">В аренде</a>
+                <a href="?status=repair{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" 
+                   class="tab {% if request.GET.status == 'repair' %}active{% endif %}">Ремонт</a>
+            </div>
+            
+            <a href="{% url 'car_create' %}" class="btn btn-primary btn-sm">+ Добавить авто</a>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Марка</th>
+                    <th>Гос. номер</th>
+                    <th>Статус</th>
+                    <th>Цена/день</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for car in cars %}
+                <tr>
+                    <td class="td-mono">#{{ car.car_id }}</td>
+                    <td class="td-primary">{{ car.brand }}</td>
+                    <td class="td-mono">{{ car.number_car }}</td>
+                    <td>
+                        {% if car.is_available == 'available' %}
+                            <span class="badge badge-green">Свободен</span>
+                        {% elif car.is_available == 'rented' %}
+                            <span class="badge badge-amber">В аренде</span>
+                        {% else %}
+                            <span class="badge badge-red">Ремонт</span>
+                        {% endif %}
+                    </td>
+                    <td class="td-mono">{{ car.daily_price }} ₽</td>
+                    <td>
+                        <div class="table-actions">
+                            <a href="{% url 'car_detail' car.car_id %}" class="btn btn-ghost btn-sm">Детали</a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6">
+                        <div class="empty">
+                            <div class="empty-icon">🔍</div>
+                            <div class="empty-text">Ничего не найдено</div>
+                            <div class="empty-sub">Попробуйте изменить поисковый запрос</div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock content %} 

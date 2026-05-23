@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Создание аренды | AutoFleet{% endblock %}
+
+{% block topbar %}
+  <header class="topbar">
+    <div class="topbar-crumb">
+      AutoFleet <span>/ Создание аренды</span>
+    </div>
+    <div style="flex:1"></div>
+    <div class="topbar-actions">
+      <!-- POST /login_staff / logout -->
+      <a href="/login_staff/" class="btn btn-ghost btn-sm">Выйти</a>
+    </div>
+  </header>
+{% endblock topbar %}
+
+{% block content %}
+<div style="max-width:600px; margin:0 auto;">
+    <div class="section">
+        <div class="section-header">
+            <span class="section-title">Создать аренду</span>
+            <span class="section-meta">POST /create_rental</span>
+        </div>
+        <div style="padding:20px 24px">
+            <form method="post" action="{% url 'rentals_create' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Клиент</label>
+                    <select name="client_id" required>
+                        <option value="">— Выберите клиента —</option>
+                        {% for client in clients %}
+                        <option value="{{ client.id }}" {% if request.GET.client == client.id|stringformat:"s" %}selected{% endif %}>
+                            {{ client.last_name }} {{ client.first_name }} · {{ client.phone }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Автомобиль</label>
+                    <select name="car_id" required>
+                        <option value="">— Выберите автомобиль —</option>
+                        {% for car in available_cars %}
+                        <option value="{{ car.id }}">
+                            {{ car.brand }} {{ car.model }} · {{ car.license_plate }} ({{ car.price_per_day }} ₽/день)
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-hint">Показаны только свободные автомобили</div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Дата начала</label>
+                        <input type="date" name="start_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Дата окончания</label>
+                        <input type="date" name="end_date" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Комментарий</label>
+                    <textarea name="comment" placeholder="Дополнительная информация..."></textarea>
+                </div>
+                
+                <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+                    <a href="{% url 'rentals' %}" class="btn btn-ghost">Отмена</a>
+                    <button type="submit" class="btn btn-primary">Создать аренду</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %} 

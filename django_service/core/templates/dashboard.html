@@ -10,13 +10,8 @@
     </div>
     <div style="flex:1"></div>
     <div class="topbar-actions">
-      <!-- POST /create_car быстрый доступ -->
-      <a href="/cars/create" class="btn btn-primary btn-sm">
-        <svg class="icon" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M12 5v14M5 12h14"/></svg>
-        Добавить авто
-      </a>
       <!-- POST /login_staff / logout -->
-      <a href="/logout" class="btn btn-ghost btn-sm">Выйти</a>
+      <a href="/login_staff/" class="btn btn-ghost btn-sm">Выйти</a>
     </div>
   </header>
 {% endblock topbar %}
@@ -45,16 +40,10 @@
       <div class="stat-card">
         <div class="stat-label">Активные аренды</div>
         <div class="stat-value" style="color:var(--amber)">{{ cars_is_rented }}</div>
-        <div class="stat-meta">
-          <span class="badge badge-amber">● {{end_time_rentals}} завершаются сегодня</span>
-        </div>
       </div>
       <div class="stat-card">
         <div class="stat-label">В ремонте</div>
         <div class="stat-value" style="color:var(--red)">{{ cars_is_repair }}</div>
-        <div class="stat-meta">
-          <span class="badge badge-red">● # требуют внимания </span>
-        </div>
       </div>
     </div>
  
@@ -63,15 +52,7 @@
     <div class="section">
       <div class="section-header">
         <span class="section-title">Последние аренды</span>
-        <span class="section-meta">GET /get_rental_all</span>
         <div style="display:flex;gap:8px;align-items:center">
-          <!-- Фильтрация по статусу — GET /get_rent_by_status -->
-          <div class="tabs">
-            <a href="?status=" class="tab active">Все</a>
-            <a href="?status=ACTIVE" class="tab">Активные</a>
-            <a href="?status=COMPLETED" class="tab">Завершённые</a>
-            <a href="?status=CANCELLED" class="tab">Отменённые</a>
-          </div>
           <!-- POST /create_rental -->
           <a href="#" onclick="openRentalModal()" class="btn btn-primary btn-sm">
             <svg class="icon" viewBox="0 0 24 24" style="width:13px;height:13px"><path d="M12 5v14M5 12h14"/></svg>
@@ -113,17 +94,7 @@
                 <td class="td-mono">{{ rent.staff_id }}</td>
                 <td>
                   <div class="table-actions">
-                    <a href="/rentals/{{ rent.id }}" class="btn btn-ghost btn-sm">Детали</a>
-                    {% if rent.status == 'active' %}
-                    <form method="post" action="/rentals/{{ rent.id }}/complete" style="display:inline">
-                      {% csrf_token %}
-                      <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--green)">✓</button>
-                    </form>
-                    <form method="post" action="/rentals/{{ rent.id }}/cancel" style="display:inline">
-                      {% csrf_token %}
-                      <button type="submit" class="btn btn-danger btn-sm">✕</button>
-                    </form>
-                    {% endif %}
+                    <a href="{% url 'rentals_detail' rent.rental_id %}" class="btn btn-ghost btn-sm">Детали</a>
                   </div>
                 </td>
               </tr>
@@ -180,8 +151,8 @@
                 </td>
                 <td>
                   <div class="table-actions">
-                    <a href="/cars/{{ car.id }}" class="btn btn-ghost btn-sm">→</a>
-                    <form method="post" action="/cars/{{ car.id }}/delete" style="display:inline">
+                    <a href="{% url 'car_detail' car.car_id %}" class="btn btn-ghost btn-sm">→</a>
+                    <form method="post" action="{% url 'car_detail' car.car_id %}" style="display:inline">
                       {% csrf_token %}
                       <button type="submit" class="btn btn-danger btn-sm">✕</button>
                     </form>
@@ -289,7 +260,7 @@
     </div>
  
     <div style="padding:20px 24px">
-      <form method="post" action="/car/create_car">
+      <form method="post" action="dashboard/car/create_car">
         {% csrf_token %}
         <div class="form-row">
           <div class="form-group">
@@ -355,7 +326,7 @@
       <span class="section-meta">POST /create_rental</span>
     </div>
     <div style="padding:20px 24px">
-      <form method="post" action="/rental/create_rental">
+      <form method="post" action="dashboard/rental/create_rental">
         {% csrf_token %}
         <div class="form-group">
           <label>Клиент</label>
@@ -422,7 +393,7 @@
       </div>
 
       <div style="padding:20px 24px">
-        <form method="post" action="/repair/create_repair">
+        <form method="post" action="dashboard/repair/create_repair">
           {% csrf_token %}
           
           <div class="form-group">
@@ -517,7 +488,7 @@
 <script>
   function openCompleteRepairModal(repairId) {
     const form = document.getElementById('completeRepairForm');
-    form.action = `/repairs/complete_repair/${repairId}`;  // эндпоинт для PATCH
+    form.action = `dashboard/repairs/complete_repair/${repairId}`;  // эндпоинт для PATCH
     document.getElementById('complete_repair_id').value = repairId;
     document.getElementById('completeRepairModal').style.display = 'flex';
   }
@@ -527,7 +498,7 @@
   
   function openCancelRepairModal(repairId) {
     const form = document.getElementById('cancelRepairForm');
-    form.action = `/repairs/delete_repair_by_id/${repairId}`;
+    form.action = `dashboard/repairs/delete_repair_by_id/${repairId}`;
     document.getElementById('cancel_repair_id').value = repairId;
     document.getElementById('cancelRepairModal').style.display = 'flex';
   }

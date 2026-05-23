@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Детали аренды | AutoFleet{% endblock %}
+
+{% block topbar %}
+  <header class="topbar">
+    <div class="topbar-crumb">
+      AutoFleet <span>/ Детали аренды</span>
+    </div>
+    <div style="flex:1"></div>
+    <div class="topbar-actions">
+      <!-- POST /login_staff / logout -->
+      <a href="/login_staff/" class="btn btn-ghost btn-sm">Выйти</a>
+    </div>
+  </header>
+{% endblock topbar %}
+
+{% block content %}
+<div class="detail-grid">
+    <!-- Левая колонка - информация об аренде -->
+    <div class="detail-card">
+        <div class="detail-header">
+            <div class="detail-id">Аренда #{{ rental.rental_id }}</div>
+            <div class="detail-name">
+                          <!-- # ACTIVE = "active"
+                # COMPLETED = "completed"
+                # CANCELLED = "cancelled" -->
+                {% if rental.status_rent == 'active' %}
+                    <span class="badge badge-green">Активна</span>
+                {% elif rental.status_rent == 'completed' %}
+                    <span class="badge badge-blue">Завершена</span>
+                {% else %}
+                    <span class="badge badge-red">Отменена</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="detail-fields">
+            <div class="detail-row">
+                <span class="detail-key">Клиент</span>
+                <span class="detail-val">
+                    <a href="{% url 'client_detail' rental.client_id %}" style="color:var(--accent); text-decoration:none;">
+                        {{ rental.client_id }}
+                    </a>
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key">Автомобиль</span>
+                <span class="detail-val">
+                    <a href="{% url 'car_detail' rental.car_id %}" style="color:var(--accent); text-decoration:none;">
+                        {{ rental.car_id }}
+                    </a>
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key">Дата начала</span>
+                <span class="detail-val">{{ rental.start_time }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key">Дата окончания</span>
+                <span class="detail-val">{{ rental.end_time }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key">Длительность</span>
+                <span class="detail-val">{{ rental.total_hours }} минут</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key">Итого</span>
+                <span class="detail-val" style="font-size:18px; font-weight:600; color:var(--accent);">
+                    {{ rental.total_price }} ₽
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key">Сотрудник</span>
+                <span class="detail-val">{{ rental.staff_id }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key">Создана</span>
+                <span class="detail-val">{{ rental.start_time }}</span>
+            </div>
+        </div>
+        
+        {% if rental.status_rent == 'active' %}
+        <div style="padding:16px 20px; border-top:1px solid var(--border); display:flex; gap:8px;">
+            <form method="post" action="{% url 'rental_complete' rental.rental_id %}" style="display:inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary" style="background:var(--green);" 
+                        onclick="return confirm('Завершить аренду?')">
+                    ✓ Завершить аренду
+                </button>
+            </form>
+            <form method="post" action="{% url 'rental_cancel' rental.rental_id %}" style="display:inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger" 
+                        onclick="return confirm('Отменить аренду?')">
+                    ✕ Отменить аренду
+                </button>
+            </form>
+        </div>
+        {% endif %}
+        
+        <div style="padding:16px 20px; border-top:1px solid var(--border);">
+            <a href="{% url 'rentals' %}" class="btn btn-ghost btn-sm">← Назад к списку</a>
+        </div>
+    </div>
+    
+    <!-- Правая колонка - дополнительная информация -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-title">Дополнительная информация</span>
+        </div>
+        <div style="padding:20px;">
+            {% if rental.status_rent == 'active' %}
+            <div class="alert alert-success" style="background:var(--green-bg); color:var(--green); border-color:rgba(45,212,160,0.3);">
+                <strong>● Активная аренда</strong><br>
+                Аренда действует до {{ rental.end_time }}.
+            </div>
+            {% elif rental.status_rent == 'completed' %}
+            <div class="alert" style="background:var(--bg3); color:var(--text2);">
+                <strong>✓ Аренда завершена</strong><br>
+                Автомобиль возвращён, аренда закрыта.
+            </div>
+            {% else %}
+            <div class="alert alert-danger">
+                <strong>✕ Аренда отменена</strong><br>
+                Аренда была отменена и не может быть восстановлена.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock content %} 
