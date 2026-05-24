@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Создать сотрудника | AutoFleet{% endblock %}
+
+{% block topbar %}
+  <header class="topbar">
+    <div class="topbar-crumb">
+      AutoFleet <span>/ Сотрудники / Создать</span>
+    </div>
+    <div style="flex:1"></div>
+    <div class="topbar-actions">
+      <a href="/login_staff/" class="btn btn-ghost btn-sm">Выйти</a>
+    </div>
+  </header>
+{% endblock topbar %}
+
+{% block content %}
+<div class="page">
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Создать нового сотрудника</span>
+      <span class="section-meta">POST /create_staff</span>
+    </div>
+
+    <form method="post" class="modal-body">
+      {% csrf_token %}
+  <!-- "username": "string",
+  "full_name": "string",
+  "email": "string",
+  "phone": "string",
+  "position": "manager",
+  "password": "string" -->
+      <div class="form-group">
+        <label for="id_username">Username</label>
+        <input type="text" id="id_username" name="username" required>
+        <div class="form-hint">Уникальное имя пользователя в системе</div>
+      </div>
+
+    <div class="form-group">
+        <label for="id_phone">full_name</label>
+        <input type="text" id="id_phone" name="full_name" required>
+        <div class="form-hint">Имя Фамилия</div>
+      </div>
+
+      <div class="form-group">
+        <label for="id_email">Email</label>
+        <input type="text" id="id_email" name="email" required>
+      </div>
+
+    <div class="form-group">
+        <label for="id_phone">Phone</label>
+        <input type="text" id="id_phone" name="phone" required>
+        <div class="form-hint">Номер телефона</div>
+      </div>
+
+    <div class="form-group">
+        <label for="id_password">Пароль</label>
+        <input type="password" id="id_password" name="password" required>
+        <div class="form-hint">Минимум 6 символов</div>
+      </div>
+
+      <div class="form-group">
+        <label for="id_position">Роль</label>
+        <select id="id_position" name="position" required>
+          <option value="manager">Менеджер</option>
+          <option value="director">Директор</option>
+          <option value="admin">Администратор</option>
+        </select>
+        <div class="form-hint">Права доступа в системе</div>
+      </div>
+
+      <div class="section-footer">
+        <div class="pagination">
+          <a href="{% url 'staff' %}" class="btn btn-ghost">Отмена</a>
+          <button type="submit" class="btn btn-primary">Создать сотрудника</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock content %}

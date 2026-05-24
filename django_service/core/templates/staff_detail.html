@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Профиль сотрудника | AutoFleet{% endblock %}
+
+{% block topbar %}
+  <header class="topbar">
+    <div class="topbar-crumb">
+      AutoFleet <span>/ Сотрудники / Профиль</span>
+    </div>
+    <div style="flex:1"></div>
+    <div class="topbar-actions">
+      <a href="/login_staff/" class="btn btn-ghost btn-sm">Выйти</a>
+    </div>
+  </header>
+{% endblock topbar %}
+
+{% block content %}
+<div class="page">
+  <div class="detail-grid">
+    <!-- Левая колонка — аватар и основная информация -->
+    <div class="detail-card">
+      <div class="detail-header">
+        <div class="avatar" style="width: 80px; height: 80px; font-size: 24px;">
+          {{ staff.username|slice:":2"|upper }}
+        </div>
+        <div class="detail-id">#{{ staff.staff_id }}</div>
+        <h1 class="detail-name">{{ staff.username }}</h1>
+        {% if staff.position == 'admin' %}
+          <span class="badge badge-red">admin</span>
+        {% elif staff.position == 'director' %}
+          <span class="badge badge-red">director</span>
+        {% else %}
+          <span class="badge badge-amber">manager</span>
+        {% endif %}
+    </div>
+    <div class="detail-fields">
+        <div class="detail-row">
+          <div class="detail-key">ID пользователя</div>
+          <div class="detail-val"># {{ staff.staff_id }}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-key">fullname</div>
+            <div class="detail-val">{{ staff.full_name }}</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-key">email</div>
+          <div class="detail-val">{{ staff.email }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Правая колонка — дополнительные действия -->
+    <div>
+      {% if role == 'admin' and staff.username != sub %}
+        <div class="section">
+          <div class="section-header">
+            <span class="section-title">Управление сотрудником</span>
+          </div>
+          <div class="table-actions" style="padding: 20px; gap: 12px;">
+            <form method="post" action="{% url 'staff_delete' staff.staff_id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger" onclick="return confirm('Удалить сотрудника?')">Удалить</button>
+            </form>
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="section">
+  <div class="section-header">
+    <span class="section-title">Аренды, принятые сотрудником</span>
+    <span class="section-meta">Всего: {{ rentals_count }}</span>
+  </div>
+  <div class="table-wrap">
+        <table>
+        <thead>
+            <tr>
+            <th>ID аренды</th>
+            <th>Автомобиль</th>
+            <th>Клиент</th>
+            <th>Дата начала</th>
+            <th>Статус</th>
+            <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rental in staff_rentals.items %}
+            <tr>
+            <td class="td-mono">#{{ rental.rental_id }}</td>
+            <td class="td-primary">{{ rental.car_id }}</td>
+            <td>{{ rental.client_id }}</td>
+            <td class="td-mono">{{ rental.start_time }}</td>
+            <td>
+                {% if rental.status_rent == 'active' %}
+                <span class="badge badge-green">Активна</span>
+                {% elif rental.status_rent == 'completed' %}
+                <span class="badge badge-blue">Завершена</span>
+                {% elif rental.status_rent == 'cancelled' %}
+                <span class="badge badge-amber">Отменена</span>
+                {% else %}
+                <span class="badge badge-red">Ошибка</span>
+                {% endif %}
+            </td>
+            <td>
+                <div class="table-actions">
+                <a href="{% url 'rentals_detail' rental.rental_id %}" class="btn btn-ghost btn-sm">Профиль</a>
+                {% if rental.status_rent == 'active' %}
+                    <a href="{% url 'rental_complete' rental.rental_id %}" class="btn btn-primary btn-sm">Завершить</a>
+                {% endif %}
+                </div>
+            </td>
+            </tr>
+            {% empty %}
+            <tr>
+            <td colspan="6">
+                <div class="empty">
+                <div class="empty-icon">🚗</div>
+                <p class="empty-text">Сотрудник пока не принимал ни одной аренды</p>
+                <p class="empty-sub">Когда сотрудник начнёт работать с арендами, они появятся здесь</p>
+                </div>
+            </td>
+            </tr>
+            {% endfor %} 
+        </tbody>
+        </table>
+    </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
