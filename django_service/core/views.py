@@ -45,9 +45,12 @@ def get_role(request):
                 headers=headers,
                 timeout=10
             )
+        if response.status_code == 200:
+            return response.json()['roles'][0]
+        else:
+            redirect('login')
     except Exception as e:
         print('error get_payload')
-    return response.json()['roles'][0]
 
 def get_sub(request):
     try:
@@ -57,9 +60,14 @@ def get_sub(request):
                 headers=headers,
                 timeout=10
             )
+        if response.status_code == 200:
+            return response.json()['sub']
+        else:
+            redirect('login')
     except Exception as e:
         print('error get_payload')
-    return response.json()['sub']
+
+
 
 # dashboard view home
 def dashboard(request):
@@ -493,30 +501,98 @@ def car_delete(request, pk):
 
 def clients(request):
     headers = get_headers(request)
-    context = {}
-    if headers:
+    
+    if not headers:
+        messages.error(request, 'Ошибка авторизации')
+        return render(request, 'clients.html', {'clients': {'items': []}, 'clients_total': 0})
+    
+    # Получаем параметр поиска из GET-запроса
+    search_query = request.GET.get('search', '').strip()
+    
+    try:
         response = requests.get(
             f'{FASTAPI_BASE_URL}/client/get_clients_all',
             headers=headers,
             timeout=10
         )
+        
         if response.status_code == 200:
             client_data = response.json()
-            context = {'clients' : client_data,
-                       'clients_total': len(client_data)}
+            clients_list = client_data.get('items', [])
+            print(clients_list)
+            # Поиск по ФИО или телефону
+            if search_query:
+                search_lower = search_query.lower()
+                clients_list = [
+                    client for client in clients_list
+                    if search_lower in client.get('full_name', '').lower()
+                    or search_lower in client.get('phone', '').lower()
+                ]
+            
+            context = {
+                'clients': {'items': clients_list},
+                'clients_total': len(clients_list),
+                'search_query': search_query,  # передаём для отображения в поле поиска
+            }
+            return render(request, 'clients.html', context)
+            
         elif response.status_code == 401:
-            redirect("login")
+            return redirect('login')
         else:
-            messages.error(request, f'Ошибка clients: {response.json().get("detail", "Неизвестная ошибка")}')
-
-    return render(request, 'clients.html', context)
+            error_detail = response.json().get('detail', 'Неизвестная ошибка')
+            messages.error(request, f'Ошибка clients: {error_detail}')
+            
+    except requests.exceptions.ConnectionError:
+        messages.error(request, 'Не удалось подключиться к серверу FastAPI')
+    except Exception as e:
+        messages.error(request, f'Ошибка: {str(e)}')
+    
+    return render(request, 'clients.html', {'clients': {'items': []}, 'clients_total': 0})
 
 
 def client_create(request):
-    return render(request, 'client_create.html')
-
-def client_delete(request, pk):
-    pass
+    headers=get_headers(request)
+    if request.method != 'POST':
+        return render(request, 'client_create.html')
+    
+    # Получаем данные из формы
+    passport = request.POST.get('passport')
+    address = request.POST.get('address')
+    driver_license = request.POST.get('driver_license')
+    full_name = request.POST.get('full_name')
+    # Простая валидация чтобы все поля были заполнены
+    if not all([passport, address, driver_license, full_name]):
+        messages.error(request, 'Заполните все поля')
+        return render(request, 'client_create.html')
+    # Готовим данные для отправки в FastAPI
+    client_data = {
+        'full_name': full_name,
+        'driver_license': driver_license,
+        'passport': passport,
+        'address': address
+    }
+    try:
+        if headers:
+            response = requests.post(
+                f'{FASTAPI_BASE_URL}/client/create_client',  # твой FastAPI endpoint
+                json=client_data,
+                timeout=10,
+                headers=headers
+            )
+        
+        if response.status_code == 201:
+            messages.success(request, 'Клиент успешно добавлен')
+        elif response.status_code == 401:
+            return redirect('login')
+        else:
+            messages.error(request, f'Ошибка: {response.json().get("detail", "Неизвестная ошибка")}')
+    
+    except requests.exceptions.ConnectionError:
+        messages.error(request, 'Не удалось подключиться к серверу FastAPI')
+    except Exception as e:
+        messages.error(request, f'Ошибка client_create: {str(e)}')
+    
+    return redirect('client_create')
 
 def client_detail(request, pk):
     headers = get_headers(request)
@@ -609,8 +685,113 @@ def rentals(request):
 
     return render(request, 'rentals.html', context)
 
+def btn_rentals_create(request):
+    pass
+
+    # get
+    # available_cars
+    # clients
+    # post
+    # end_time
+    # start_time
+    # car_id    
+    # client_id
+
 def rentals_create(request):
-    return render(request, 'rental_create.html')
+    headers = get_headers(request)
+    
+    if not headers:
+        messages.error(request, 'Ошибка авторизации')
+        return redirect('login')
+    
+    # ===== POST-запрос: обрабатываем отправку формы =====
+    if request.method == 'POST':
+        # Получаем данные из формы
+        car_id = request.POST.get('car_id')
+        client_id = request.POST.get('client_id')
+        start_time = request.POST.get('start_time')
+        end_time = request.POST.get('end_time')
+        
+        # Валидация
+        if not all([car_id, client_id, start_time, end_time]):
+            messages.error(request, 'Заполните все поля')
+            print([car_id, client_id, start_time, end_time])
+            return redirect('rentals_create')
+        
+        # Готовим данные для отправки в FastAPI
+        rental_data = {
+            'car_id': int(car_id),
+            'client_id': int(client_id),  # ← исправлено!
+            'start_time': start_time,
+            'end_time': end_time,
+        }
+        
+        try:
+            response = requests.post(
+                f'{FASTAPI_BASE_URL}/rental/create_rental',
+                json=rental_data,
+                timeout=10,
+                headers=headers
+            )
+            
+            if response.status_code == 201:
+                messages.success(request, 'Аренда успешно создана')
+                return redirect('rentals')  # ← редирект на список аренд
+            elif response.status_code == 401:
+                return redirect('login')
+            else:
+                error_msg = response.json().get('detail', 'Неизвестная ошибка')
+                messages.error(request, f'Ошибка: {error_msg}')
+                
+        except requests.exceptions.ConnectionError:
+            messages.error(request, 'Не удалось подключиться к серверу FastAPI')
+        except Exception as e:
+            messages.error(request, f'Ошибка rental_create: {str(e)}')
+        
+        return redirect('rentals_create')
+    
+    # ===== GET-запрос: показываем форму =====
+    try:
+        response_clients = requests.get(
+            f'{FASTAPI_BASE_URL}/client/get_clients_all',
+            headers=headers,
+            timeout=10
+        )
+        response_cars = requests.get(
+            f'{FASTAPI_BASE_URL}/car/get_cars_all',
+            headers=headers,
+            timeout=10
+        )
+        
+        if response_clients.status_code == 401 or response_cars.status_code == 401:
+            return redirect('login')
+        
+        if response_clients.status_code != 200:
+            messages.error(request, 'Ошибка загрузки списка клиентов')
+            return redirect('rentals')
+        
+        if response_cars.status_code != 200:
+            messages.error(request, 'Ошибка загрузки списка автомобилей')
+            return redirect('rentals')
+        
+        clients = response_clients.json()
+        cars = response_cars.json()
+        
+        # Фильтруем только свободные автомобили
+        cars_is_available = [car for car in cars.get('items', []) if car.get('is_available') == 'available']
+        
+        context = {
+            'clients': clients,
+            'available_cars': cars_is_available,
+        }
+        return render(request, 'rental_create.html', context)
+        
+    except requests.exceptions.ConnectionError:
+        messages.error(request, 'Не удалось подключиться к серверу FastAPI')
+        return redirect('rentals')
+    except Exception as e:
+        messages.error(request, f'Ошибка: {str(e)}')
+        return redirect('rentals')
 
 def rentals_detail(request, pk):
     headers = get_headers(request)
@@ -741,7 +922,89 @@ def repairs(request):
         return render(request, 'repairs.html', context)
 
 def repairs_create(request):
-    return render(request, 'repair_create.html')
+    headers = get_headers(request)
+    
+    if not headers:
+        messages.error(request, 'Ошибка авторизации')
+        return redirect('login')
+    # start_time
+    # car_id
+    # price
+    # ===== POST-запрос: обрабатываем отправку формы =====
+    if request.method == 'POST':
+        # Получаем данные из формы
+        car_id = request.POST.get('car_id')
+        start_time = request.POST.get('start_time')
+        price = request.POST.get('price')
+
+        # Валидация
+        if not all([car_id, start_time, price]):
+            messages.error(request, 'Заполните все поля')
+            return redirect('repairs_create')
+        
+        # Готовим данные для отправки в FastAPI
+        rental_data = {
+            'car_id': int(car_id),
+            'start_rep': start_time,
+            'price_rep': price,
+        }
+        
+        try:
+            response = requests.post(
+                f'{FASTAPI_BASE_URL}/repair/create_repair',
+                json=rental_data,
+                timeout=10,
+                headers=headers
+            )
+            
+            if response.status_code == 201:
+                messages.success(request, 'Ремонт успешно создан')
+                return redirect('repairs')
+            elif response.status_code == 401:
+                return redirect('login')
+            else:
+                print(response.json())
+                error_msg = response.json().get('detail', 'Неизвестная ошибка')
+                messages.error(request, f'Ошибка: {error_msg}')
+                
+        except requests.exceptions.ConnectionError:
+            messages.error(request, 'Не удалось подключиться к серверу FastAPI')
+        except Exception as e:
+            messages.error(request, f'Ошибка repairs_create: {str(e)}')
+        
+        return redirect('repairs_create')
+    
+    # ===== GET-запрос: показываем форму =====
+    try:
+        response_cars = requests.get(
+            f'{FASTAPI_BASE_URL}/car/get_cars_all',
+            headers=headers,
+            timeout=10
+        )
+        
+        if response_cars.status_code == 401:
+            return redirect('login')
+        
+        if response_cars.status_code != 200:
+            messages.error(request, 'Ошибка загрузки списка автомобилей')
+            return redirect('repairs_create')
+        
+        cars = response_cars.json()
+        
+        # Фильтруем только свободные автомобили
+        cars_is_available = [car for car in cars.get('items', []) if car.get('is_available') == 'available']
+        print( cars_is_available)
+        context = {
+            'cars_is_available': cars_is_available,
+        }
+        return render(request, 'repair_create.html', context)
+        
+    except requests.exceptions.ConnectionError:
+        messages.error(request, 'Не удалось подключиться к серверу FastAPI')
+        return redirect('repairs')
+    except Exception as e:
+        messages.error(request, f'Ошибка: {str(e)}')
+        return redirect('repairs')
 
 def repairs_detail(request, pk):
 
@@ -783,7 +1046,34 @@ def repairs_detail(request, pk):
     return render(request, 'repairs.html', context)
 
 def repairs_delete(request, pk):
-    return render(request, 'repair_create.html')
+    headers = get_headers(request)
+    try:
+        if headers:
+            response = requests.delete(
+                f'{FASTAPI_BASE_URL}/repair/delete_repair_by_id',  # ваш эндпоинт
+                params={'repair_id': pk},
+                headers=headers,
+                timeout=10
+            )
+            if response.status_code == 200:
+                messages.success(request, f'Ремонт #{pk} успешно удален')
+                return redirect('repairs')
+            elif response.status_code == 401:
+                return redirect('login')
+            elif response.status_code == 404:
+                messages.error(request, 'Аренда не найден')
+                return redirect('repairs')
+            else:
+                print(response.json())
+                messages.error(request, 'Ошибка при загрузке данных')
+                return redirect('repairs')
+    except requests.exceptions.ConnectionError:
+        messages.error(request, 'Не удалось подключиться к серверу')
+        return redirect('repairs')
+    except Exception as e:
+        messages.error(request, f'Ошибка repair_delete: {str(e)}')
+        return redirect('repairs')
+    return render(request, 'repairs.html')
 
 
 
@@ -793,6 +1083,7 @@ def repair_complete(request, pk):
     try:
         if headers:
             now_utc = datetime.now(timezone.utc)
+
             end_rep_formatted = now_utc.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
             response = requests.patch(
                 f'{FASTAPI_BASE_URL}/repair/complete_repair',  # ваш эндпоинт
@@ -810,6 +1101,7 @@ def repair_complete(request, pk):
                 messages.error(request, 'Аренда не найден')
                 return redirect('repairs')
             else:
+                print(response.json())
                 messages.error(request, 'Ошибка при загрузке данных')
                 return redirect('repairs')
     except requests.exceptions.ConnectionError:
@@ -846,6 +1138,73 @@ def staff(request):
     return render(request, 'staff.html', context)
 
 def staff_create(request):
+    headers = get_headers(request)
+    
+    if not headers:
+        messages.error(request, 'Ошибка авторизации')
+        return redirect('login')
+
+    # ===== POST-запрос: обрабатываем отправку формы =====
+    if request.method == 'POST':
+        # Получаем данные из формы
+#         {
+#   "username": "string",
+#   "full_name": "string",
+#   "email": "string",
+#   "phone": "string",
+#   "position": "manager",
+#   "password": "string"
+# }
+        username = request.POST.get('username')
+        full_name = request.POST.get('full_name')
+        email = request.POST.get('email')
+        phone = request.POST.get('phone')
+        position = request.POST.get('position')
+        password = request.POST.get('password')
+
+        # Валидация
+        if not all([username, full_name, email, phone, position, password]):
+            messages.error(request, 'Заполните все поля')
+            return redirect('repairs_create')
+        
+
+        staff_data = {
+            "username": username,
+            "full_name": full_name,
+            "email": email,
+            "phone": phone,
+            "position": position,
+            "password": password
+        }
+        
+        try:
+            response = requests.post(
+                f'{FASTAPI_BASE_URL}/staff/create_staff',
+                json=staff_data,
+                timeout=10,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                messages.success(request, 'Сотрудник успешно создан')
+                return redirect('staff')
+            elif response.status_code == 409 or response.status_code == 422:
+                error = response.json()
+                messages.error(request, f'Ошибка: {error["error"]}')
+                return redirect('staff')
+            elif response.status_code == 401:
+                return redirect('login')
+            else:
+                print(response.json())
+                error_msg = response.json().get('detail', 'Неизвестная ошибка')
+                messages.error(request, f'Ошибка: {error_msg}')
+                
+        except requests.exceptions.ConnectionError:
+            messages.error(request, 'Не удалось подключиться к серверу FastAPI')
+        except Exception as e:
+            messages.error(request, f'Ошибка staff_create: {str(e)}')
+        
+        return redirect('staff')
     return render(request, 'staff_create.html')
     
 
@@ -870,9 +1229,11 @@ def staff_detail(request, pk):
                     headers=headers,
                     timeout=10
                 )
-
                 if response.status_code == 200 and response_staff.status_code == 200:
-                    staff_rentals = response_staff.json()
+                    if response_staff.json() == {"error": "Не найдено"}:
+                        staff_rentals = []
+                    else:
+                        staff_rentals = response_staff.json()
                     staff = response.json()
                     context={
                         'staff': staff,
@@ -892,23 +1253,39 @@ def staff_detail(request, pk):
 
 def staff_delete(request, pk):
     headers = get_headers(request)
+    
+    if not headers:
+        messages.error(request, 'Ошибка авторизации')
+        return redirect('staff')
+    
     try:
-        if headers:
-                response = requests.delete(
-                    f'{FASTAPI_BASE_URL}/staff/delete_staff ', 
-                    params={'id': pk},
-                    headers=headers,
-                    timeout=10
-                )
-                if response.status_code == 200:
-                    return redirect('staff_detail')
+        response = requests.delete(
+            f'{FASTAPI_BASE_URL}/staff/delete_staff',
+            params={'staff_id': int(pk)},
+            headers=headers,
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            messages.success(request, f'Сотрудник #{pk} успешно удалён')
+            return redirect('staff')
+        elif response.status_code == 401:
+            return redirect('login')
+        elif response.status_code == 404:
+            messages.error(request, 'Сотрудник не найден')
+            return redirect('staff')
+        else:
+            error_msg = response.json().get('detail', 'Неизвестная ошибка')
+            messages.error(request, f'Ошибка: {error_msg}')
+            print(response.json())
+            return redirect('staff')
+            
     except requests.exceptions.ConnectionError:
-        messages.error(request, 'Не удалось подключиться к серверу')
+        messages.error(request, 'Не удалось подключиться к серверу FastAPI')
         return redirect('staff')
     except Exception as e:
         messages.error(request, f'Ошибка в staff_delete: {str(e)}')
         return redirect('staff')
-    return render(request, 'staff_detail.html')
 
 
 # профиль
@@ -926,7 +1303,7 @@ def infome(request):
             headers=headers,
             timeout=10
         )
-        
+
         if response.status_code == 401:
             return redirect('login')
         
@@ -936,6 +1313,10 @@ def infome(request):
         
         infome = response.json()
         
+        if infome['roles'][0] == 'manager':
+            messages.warning(request, 'Не достаточно прав для полных данных')
+            return render(request, 'infome.html', {'error': True})
+
         # 2. Получаем список всех сотрудников
         response_staff = requests.get(
             f'{FASTAPI_BASE_URL}/staff/get_staff_all', 

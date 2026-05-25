@@ -60,8 +60,8 @@
                     ✓ Завершить ремонт
                 </button>
             </form>
-            {% if user.role == 'admin' %}
-            <form method="post" action="{% url 'repair_delete' repair.repair_id %}" style="display:inline">
+            {% if role == 'admin' %}
+            <form method="post" action="{% url 'repairs_delete' repair.repair_id %}" style="display:inline">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-danger" 
                         onclick="return confirm('Удалить заявку на ремонт?')">
@@ -74,13 +74,6 @@
         
         <div style="padding:16px 20px; border-top:1px solid var(--border); display:flex; gap:8px;">
             <a href="{% url 'repairs' %}" class="btn btn-ghost btn-sm">← Назад к списку</a>
-            {% if repair.end_rep is None and role == 'admin' %}
-            <form method="post" action="{% url 'repairs_delete' repair.repair_id %}" style="display:inline">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger btn-sm" 
-                        onclick="return confirm('Удалить заявку?')">Удалить</button>
-            </form>
-            {% endif %}
         </div>
     </div>
     

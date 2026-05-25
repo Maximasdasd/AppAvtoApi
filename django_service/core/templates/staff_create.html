@@ -23,7 +23,7 @@
       <span class="section-meta">POST /create_staff</span>
     </div>
 
-    <form method="post" class="modal-body">
+    <form method="post" class="modal-body" action="{% url 'staff_create' %}">
       {% csrf_token %}
   <!-- "username": "string",
   "full_name": "string",

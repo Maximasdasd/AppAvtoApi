@@ -174,7 +174,7 @@ class RentalController:
         if rent:
             return rent
         else:
-            raise HTTPException(status_code=404, detail="Аренда не найдена с таким id")
+            raise HTTPException(status_code=200, detail="Аренда не найдена с таким id")
 
     def get_rent_by_client_id(self, client_id: int):
         rent = select(RentalModel).where(RentalModel.client_id == client_id).order_by(RentalModel.rental_id)
@@ -182,7 +182,7 @@ class RentalController:
         if result:
             return paginate(self.db, rent)
         else:
-            raise HTTPException(status_code=404, detail="Не найдено")
+            raise HTTPException(status_code=200, detail="Не найдено")
 
     def get_rent_by_car_id(self, car_id: int):
         rent = select(RentalModel).where(RentalModel.car_id == car_id).order_by(RentalModel.rental_id)
@@ -190,7 +190,7 @@ class RentalController:
         if result:
             return paginate(self.db, rent)
         else:
-            raise HTTPException(status_code=404, detail="Не найдено")
+            raise HTTPException(status_code=200, detail="Не найдено")
 
 
     def get_rent_by_staff_id(self, staff_id: int):
@@ -199,7 +199,7 @@ class RentalController:
         if result:
             return paginate(self.db, rent)
         else:
-            raise HTTPException(status_code=404, detail="Не найдено")
+            raise HTTPException(status_code=200, detail="Не найдено")
 
     def get_rent_by_status(self, status_rent: str):
         if status_rent in RentalStatus.__members__:
@@ -208,7 +208,7 @@ class RentalController:
             if result:
                 return paginate(self.db, rent)
             else:
-                raise HTTPException(status_code=404, detail="Не найдено")
+                raise HTTPException(status_code=200, detail="Не найдено")
         else:
-            raise HTTPException(status_code=404, detail="Не найдено")
+            raise HTTPException(status_code=200, detail="Не найдено")
 

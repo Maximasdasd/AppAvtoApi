@@ -23,15 +23,18 @@
             <div class="detail-name">{{ username }}</div>
             <div class="detail-id">Права(Роль): {% if role == 'admin' %}Администратор{% else %}Менеджер{% endif %}</div>
         </div>
+        {% if role == 'admin' %}
         <div class="detail-fields">
             <div class="detail-row"><span class="detail-key">Email</span><span class="detail-val">{{ email }}</span></div>
             <div class="detail-row"><span class="detail-key">Полное имя</span><span class="detail-val">{{ full_name }}</span></div>
             <div class="detail-row"><span class="detail-key">Должность</span><span class="detail-val">{{ position }}</span></div>
             <div class="detail-row"><span class="detail-key">ID</span><span class="detail-val">{{ staff_id }}</span></div>
         </div>
+        {% endif %}
     </div>
 
     {# Список аренд, созданных этим сотрудником (если менеджер) #}
+    {%if role == 'admin' %}
     <div class="section">
         <div class="section-header"><span class="section-title">Мои оформленные аренды</span></div>
         <div class="table-wrap">
@@ -51,5 +54,6 @@
             </table>
         </div>
     </div>
+    {% endif %}
 </div>
 {% endblock content %} 

@@ -31,7 +31,7 @@
             <tbody>
                 {% for staff in staff_list.items %}
                 <tr>
-                    <td class="td-mono">#{{ staff.id }}</td>
+                    <td class="td-mono">#{{ staff.staff_id }}</td>
                     <td class="td-primary">{{ staff.username }}</td>
                     <td>{% if staff.position == 'admin' %}<span class="badge badge-red">admin</span>{% elif staff.position == 'director' %}<span class="badge badge-red">director</span>{% else %}<span class="badge badge-amber">manager</span>{% endif %}</td>
                     <td class="td-mono">{{ staff.created_at|date:"d.m.Y" }}</td>

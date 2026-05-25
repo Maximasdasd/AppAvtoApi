@@ -59,10 +59,12 @@
     <div class="nav-section">Система</div>
  
     <!-- GET /get_staff_all — только admin -->
+     {% if role == 'admin' %}
     <a href="/staff" class="nav-link {% if request.resolver_match.url_name == 'staff' %}active{% endif %}" >
       <svg class="nav-icon icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       Сотрудники
     </a>
+    {% endif %}
  
     <!-- GET /info_me -->
     <a href="/infome" class="nav-link {% if request.resolver_match.url_name == 'infome' %}active{% endif %}">
@@ -87,7 +89,7 @@
     {% for message in messages %}
     <div class="alert alert-{{ message.tags }}">
         <span class="alert-text">{{ message }}</span>
-        <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+        <button class="alert-close" onclick="this.parentElement.remove()"> ×</button>
     </div>
     {% endfor %}
 </div>

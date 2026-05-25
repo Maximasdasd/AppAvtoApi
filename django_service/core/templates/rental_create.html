@@ -30,9 +30,9 @@
                     <label>Клиент</label>
                     <select name="client_id" required>
                         <option value="">— Выберите клиента —</option>
-                        {% for client in clients %}
-                        <option value="{{ client.id }}" {% if request.GET.client == client.id|stringformat:"s" %}selected{% endif %}>
-                            {{ client.last_name }} {{ client.first_name }} · {{ client.phone }}
+                        {% for client in clients.items %}
+                        <option value="{{ client.client_id }}" {% if request.GET.client == client.id|stringformat:"s" %}selected{% endif %}>
+                            {{ client.full_name }} · id{{ client.client_id }}
                         </option>
                         {% endfor %}
                     </select>
@@ -43,8 +43,8 @@
                     <select name="car_id" required>
                         <option value="">— Выберите автомобиль —</option>
                         {% for car in available_cars %}
-                        <option value="{{ car.id }}">
-                            {{ car.brand }} {{ car.model }} · {{ car.license_plate }} ({{ car.price_per_day }} ₽/день)
+                        <option value="{{ car.car_id }}">
+                            {{ car.brand }} · {{ car.number_car }} ({{ car.daily_price }} ₽/день)
                         </option>
                         {% endfor %}
                     </select>
@@ -52,19 +52,14 @@
                 </div>
                 
                 <div class="form-row">
-                    <div class="form-group">
-                        <label>Дата начала</label>
-                        <input type="date" name="start_date" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Дата окончания</label>
-                        <input type="date" name="end_date" required>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Комментарий</label>
-                    <textarea name="comment" placeholder="Дополнительная информация..."></textarea>
+          <div class="form-group">
+            <label>Дата начала</label>
+            <input type="datetime-local" name="start_time" class="datetime-input">
+          </div>
+          <div class="form-group">
+            <label>Дата окончания</label>
+            <input type="datetime-local" name="end_time" class="datetime-input">
+          </div>
                 </div>
                 
                 <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
