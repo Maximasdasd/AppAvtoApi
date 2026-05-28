@@ -79,24 +79,6 @@ def create_staff(staff_data: StaffCreate,
     """
     return controller.create_staff(staff_data)
 
-@router.delete("/delete_staff")
-def delete_staff(staff_id: int,
-                 controller: StaffController = Depends(get_controllers_staff),
-                 token: str = Depends(oauth2_scheme), 
-                 check_roles: str = Depends(wrapprer_check_roles(['admin']))):
-    """
-    Удаляет учетную запись сотрудника
-    
-    :param staff_id: Описание
-    :type staff_id: int
-    :param controller: Описание
-    :type controller: StaffController
-    :param token: Описание
-    :type token: str
-    :param check_roles: Описание
-    :type check_roles: str
-    """
-    return controller.delete_staff(staff_id)
 
 # staff_data: OAuth2PasswordRequestForm = Depends()
 @router.post("/login_staff", response_model=GetToken)

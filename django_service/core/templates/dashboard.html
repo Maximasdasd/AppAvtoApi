@@ -77,7 +77,7 @@
             </tr>
           </thead>
             <tbody>
-              {% for rent in rentals %}
+              {% for rent in rentals|dictsortreversed:"rental_id" %}
               <tr>
                 <td class="td-mono">#{{ rent.rental_id }}</td>
                 <td class="td-primary">{{ rent.client_id }}</td>
@@ -133,7 +133,7 @@
               </tr>
             </thead>
               <tbody>
-              {% for car in cars %}
+              {% for car in cars|dictsortreversed:"car_id" %}
               <tr>
                 <td class="td-mono">#{{ car.car_id }}</td>
                 <td class="td-primary">{{ car.brand }} {{ car.model }}</td>
@@ -152,10 +152,6 @@
                 <td>
                   <div class="table-actions">
                     <a href="{% url 'car_detail' car.car_id %}" class="btn btn-ghost btn-sm">→</a>
-                    <form method="post" action="{% url 'car_detail' car.car_id %}" style="display:inline">
-                      {% csrf_token %}
-                      <button type="submit" class="btn btn-danger btn-sm">✕</button>
-                    </form>
                   </div>
                 </td>
               </tr>
@@ -197,7 +193,7 @@
               </tr>
             </thead>
             <tbody>
-                {% for repair in repairs %}
+                {% for repair in repairs|dictsortreversed:"repair_id" %}
                 <tr>
                   <td class="td-mono">#{{ repair.repair_id }}</td>
                   <td class="td-mono">{{ repair.car.brand }} #{{ repair.car_id }}</td>
@@ -400,7 +396,7 @@
             <label>Автомобиль</label>
             <select name="car_id" required>
               <option value="">— Выберите автомобиль —</option>
-              {% for car in cars %}
+              {% for car in available_cars_all %}
                 <option value="{{ car.car_id }}">
                   {{ car.brand }} {{ car.model }} · {{ car.number_car }}
                 </option>

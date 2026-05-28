@@ -1,9 +1,12 @@
 from models.model import Cars as CarsModel
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from fastapi_pagination.ext.sqlalchemy import paginate
 from schemas.car import CreateCar, CarResponse
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
+from models.model import Rental
+from models.model import Repair
+
 
 
 class CarController:
@@ -27,7 +30,16 @@ class CarController:
         if car:
             if car.is_available=="under_repair" or car.is_available=="rented":
                 raise HTTPException(status_code=400, detail="Нельзя удалить машину, которая находится в аренде или ремонте")
-            
+                # Удаляем связанные аренды
+            self.db.execute(
+                    delete(Rental).where(Rental.car_id == car_id)
+                )
+                
+                # Удаляем связанные ремонты
+            self.db.execute(
+                    delete(Repair).where(Repair.car_id == car_id)
+                )
+    
             self.db.delete(car)
             self.db.commit()
             return {"message": "Авто успешно удалено"}

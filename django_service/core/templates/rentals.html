@@ -42,7 +42,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for rent in rentals.items %}
+                {% for rent in rentals.items|dictsortreversed:"rental_id" %}
                 <tr>
                     <td class="td-mono">#{{ rent.rental_id }}</td>
                     <td class="td-primary">{{ rent.client_id }}</td>

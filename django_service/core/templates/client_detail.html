@@ -66,6 +66,7 @@
             </a>
         </div>
         <div class="table-wrap">
+            {% if rentals.items and 'error' not in rentals %}
             <table>
                 <thead>
                     <tr>
@@ -117,6 +118,9 @@
                     {% endfor %}
                 </tbody>
             </table>
+            {% else %}
+            <span>Ничего не найдено</span>
+            {% endif %}
         </div>
     </div>
 </div>

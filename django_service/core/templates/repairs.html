@@ -26,7 +26,7 @@
         <table>
             <thead><tr><th>ID</th><th>Автомобиль</th><th>Описание</th><th>Начало ремонта</th><th>Конец ремонта</th><th>Действия</th></tr></thead>
             <tbody>
-                {% for repair in repairs.items %}
+                {% for repair in repairs.items|dictsortreversed:"repair_id" %}
                 <tr>
                     <td class="td-mono">#{{ repair.repair_id }}</td>
                     <td class="td-primary">{{ repair.car_id }}</td>

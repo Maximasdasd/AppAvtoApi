@@ -36,20 +36,28 @@
             </div>
         </div>
         <div class="detail-fields">
-            <div class="detail-row">
+                    <div class="detail-row">
                 <span class="detail-key">Клиент</span>
                 <span class="detail-val">
-                    <a href="{% url 'client_detail' rental.client_id %}" style="color:var(--accent); text-decoration:none;">
-                        {{ rental.client_id }}
-                    </a>
+                    {% if rental.client_id %}
+                        <a href="{% url 'client_detail' rental.client_id %}" style="color:var(--accent); text-decoration:none;">
+                            {{ rental.client_id }}
+                        </a>
+                    {% else %}
+                        <span class="text-muted">Клиент не указан</span>
+                    {% endif %}
                 </span>
             </div>
             <div class="detail-row">
                 <span class="detail-key">Автомобиль</span>
                 <span class="detail-val">
-                    <a href="{% url 'car_detail' rental.car_id %}" style="color:var(--accent); text-decoration:none;">
-                        {{ rental.car_id }}
-                    </a>
+                    {% if rental.car_id %}
+                        <a href="{% url 'car_detail' rental.car_id %}" style="color:var(--accent); text-decoration:none;">
+                            {{ rental.car_id }}
+                        </a>
+                    {% else %}
+                        <span class="text-muted">Автомобиль не указан</span>
+                    {% endif %}
                 </span>
             </div>
             <div class="detail-row">

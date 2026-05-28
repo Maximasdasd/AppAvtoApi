@@ -74,15 +74,3 @@ class ClientController:
                 return client
         else:
             raise HTTPException(status_code=404, detail="Клиент не найден")
-        
-
-    def delete_all_clients(self):
-        has_clients = self.db.execute(
-            select(exists().select_from(ClientModel))
-        ).scalar_one()
-        if not has_clients:
-            raise HTTPException(404, "Клиенты не найдены")
-        else:
-            self.db.execute(delete(ClientModel))
-            self.db.commit()
-            return {"message": "Все клиенты удалены"}

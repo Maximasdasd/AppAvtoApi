@@ -44,12 +44,3 @@ def refresh_client(client_new_data:ClientCreate, client_id, controller: ClientCo
     """Обновление Клиента"""
     return controller.refresh_client(client_new_data, client_id)
 
-
-
-@router.delete("/delete_all_clients", status_code=200)
-def delete_all_clients(controller: ClientController = Depends(get_controllers_client), 
-                       token: str = Depends(oauth2_scheme), 
-                       check_roles: str = Depends(wrapprer_check_roles(['admin']))) -> dict:
-    """Удаление всех клиентов"""
-    return controller.delete_all_clients()
-

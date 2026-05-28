@@ -838,7 +838,7 @@ def rental_complete(request, pk):
             )
             if response.status_code == 200:
                 messages.success(request, f'Аренда #{pk} успешно завершена')
-                return render(request, 'rental_detail.html', {'pk': pk})
+                return redirect('rentals')
             elif response.status_code == 401:
                 return redirect('login')
             elif response.status_code == 404:
@@ -853,13 +853,13 @@ def rental_complete(request, pk):
     except Exception as e:
         messages.error(request, f'Ошибка rental_complete: {str(e)}')
         return redirect('rentals')
-    return render(request, 'rental_detail.html', {'pk': pk})
+    return redirect('rentals')
 
 def rental_cancel(request, pk):
     headers = get_headers(request)
     try:
         if headers:
-            response = requests.post(
+            response = requests.patch(
                 f'{FASTAPI_BASE_URL}/rental/rent_cancelled',  # ваш эндпоинт
                 params={'rent_id': pk},
                 headers=headers,
@@ -867,7 +867,7 @@ def rental_cancel(request, pk):
             )
             if response.status_code == 200:
                 messages.success(request, f'Аренда #{pk} успешно отменена')
-                return render(request, 'rental_detail.html')
+                return redirect('rentals')
             elif response.status_code == 401:
                 return redirect('login')
             elif response.status_code == 404:
@@ -882,7 +882,7 @@ def rental_cancel(request, pk):
     except Exception as e:
         messages.error(request, f'Ошибка rental_cancel: {str(e)}')
         return redirect('rentals')
-    return render(request, 'rental_detail.html')
+    return redirect('rentals')
 
 
 # ремонт
@@ -1274,6 +1274,12 @@ def staff_delete(request, pk):
         elif response.status_code == 404:
             messages.error(request, 'Сотрудник не найден')
             return redirect('staff')
+        elif response.status_code == 409 or response.status_code == 422:
+            error = response.json()
+            messages.error(request, f'Ошибка: {error["error"]}')
+            return redirect('staff')
+
+        
         else:
             error_msg = response.json().get('detail', 'Неизвестная ошибка')
             messages.error(request, f'Ошибка: {error_msg}')
@@ -1361,6 +1367,12 @@ def infome(request):
         
         if response_rent.status_code == 200:
             context['my_rentals'] = response_rent.json()
+
+        elif response_rent.status_code == 409 or response_rent.status_code == 422:
+                error = response.json()
+                messages.error(request, f'Ошибка: {error["error"]}')
+                context['my_rentals'] = {'items': []}
+                return render(request, 'infome.html', context)
         else:
             context['my_rentals'] = {'items': []}
         

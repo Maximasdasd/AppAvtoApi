@@ -36,7 +36,7 @@
             </div>
         </div>
     </div>
-
+    {% if car_rentals.items and 'error' not in car_rentals %}
     <div class="section">
         <div class="section-header">
             <span class="section-title">История аренд</span>
@@ -61,6 +61,18 @@
             </table>
         </div>
     </div>
+    {% else %}
+         <div class="section">
+        <div class="section-header">
+            <span class="section-title">История аренд</span>
+            <span class="section-meta">GET /rentals/bycar/{{ car.id }}</span>
+        </div>
+        <div class="table-wrap">
+            Ничего не найдено
+        </div>
+    </div>
+    {% endif %}
+
 </div>
 
 <div style="margin-top:20px; display:flex; gap:8px; justify-content:flex-end">

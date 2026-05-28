@@ -68,19 +68,6 @@ class StaffController:
         self.db.commit()
         return staff
     
-
-
-    def delete_staff(self, staff_id: int):
-        staff = self.db.get(StaffModel, staff_id)
-        if staff:
-            if staff.staff_id == 1 or staff.position == "admin":
-                raise HTTPException(status_code=403, detail="Операция запрещена: нельзя удалить администратора")
-            else:
-                self.db.delete(staff)
-                self.db.commit()
-                return {"message": "Сотрудник удалён"}
-        else:
-            raise HTTPException(status_code=404, detail="Сотрудник не найден")
         
 
 

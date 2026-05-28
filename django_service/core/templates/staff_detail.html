@@ -50,22 +50,6 @@
       </div>
     </div>
 
-    <!-- Правая колонка — дополнительные действия -->
-    <div>
-      {% if role == 'admin' and staff.username != sub %}
-        <div class="section">
-          <div class="section-header">
-            <span class="section-title">Управление сотрудником</span>
-          </div>
-          <div class="table-actions" style="padding: 20px; gap: 12px;">
-            <form method="post" action="{% url 'staff_delete' staff.staff_id %}">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-danger" onclick="return confirm('Удалить сотрудника?')">Удалить</button>
-            </form>
-          </div>
-        </div>
-      {% endif %}
-
       <div class="section">
   <div class="section-header">
     <span class="section-title">Аренды, принятые сотрудником</span>
@@ -103,7 +87,7 @@
             </td>
             <td>
                 <div class="table-actions">
-                <a href="{% url 'rentals_detail' rental.rental_id %}" class="btn btn-ghost btn-sm">Профиль</a>
+                <a href="{% url 'rentals_detail' rental.rental_id %}" class="btn btn-ghost btn-sm">Детали</a>
                 {% if rental.status_rent == 'active' %}
                     <a href="{% url 'rental_complete' rental.rental_id %}" class="btn btn-primary btn-sm">Завершить</a>
                 {% endif %}
