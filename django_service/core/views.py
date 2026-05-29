@@ -1165,7 +1165,7 @@ def staff_create(request):
         # Валидация
         if not all([username, full_name, email, phone, position, password]):
             messages.error(request, 'Заполните все поля')
-            return redirect('repairs_create')
+            return redirect('staff_create')
         
 
         staff_data = {
