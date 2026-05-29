@@ -16,10 +16,10 @@ def get_cars_all(controller: CarController = Depends(get_controllers),
     return controller.get_all_car()
 
 @router.get("/get_car/{id}")
-def get_car(car_id: int, controller: CarController = Depends(get_controllers), 
+def get_car(id: int, controller: CarController = Depends(get_controllers), 
             token: str = Depends(oauth2_scheme), 
             check_roles: str = Depends(wrapprer_check_roles(['admin', 'manager']))) -> CarResponse:
-    return controller.get_car_by_id(car_id)
+    return controller.get_car_by_id(id)
 
 @router.post("/create_car", response_model=CarResponse, status_code=201)
 def create_car(car_data: CreateCar, controller: CarController = Depends(get_controllers), 
@@ -29,7 +29,7 @@ def create_car(car_data: CreateCar, controller: CarController = Depends(get_cont
     return controller.create_car(car_data)
 
 @router.delete("/delete_car/{id}")
-def delete_car(car_id: int, controller: CarController = Depends(get_controllers),
+def delete_car(id: int, controller: CarController = Depends(get_controllers),
                token: str = Depends(oauth2_scheme),
                check_roles: str = Depends(wrapprer_check_roles(['admin', 'manager']))):
     """
@@ -44,4 +44,4 @@ def delete_car(car_id: int, controller: CarController = Depends(get_controllers)
     :param check_roles: Описание
     :type check_roles: str
     """
-    return controller.delete_car(car_id)
+    return controller.delete_car(id)

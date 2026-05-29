@@ -9,13 +9,13 @@ class RepairComplete(RepairBase):
     end_rep: datetime
 
 class RepairCreate(RepairBase):
-    car_id: int = Field(foreign_key="cars.car_id")
+    car_id: int
     start_rep: datetime
     price_rep: float
 
 class RepairResponse(RepairBase):
     repair_id: int
-    car_id: int = Field(foreign_key="cars.car_id")
+    car_id: int
     start_rep: datetime
     end_rep: Optional[datetime]
     price_rep: float
