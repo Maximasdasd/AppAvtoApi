@@ -483,7 +483,7 @@ def car_delete(request, pk):
     headers = get_headers(request)
     if request.method == 'POST':
         response = requests.delete(
-            f'{FASTAPI_BASE_URL}/car/delete_car/{id}',
+            f'{FASTAPI_BASE_URL}/car/delete_car/{pk}',
             params={'car_id': pk},
             headers=headers,
             timeout=10
