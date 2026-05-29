@@ -1251,49 +1251,6 @@ def staff_detail(request, pk):
     return render(request, 'staff_detail.html', context)
 
 
-def staff_delete(request, pk):
-    headers = get_headers(request)
-    
-    if not headers:
-        messages.error(request, 'Ошибка авторизации')
-        return redirect('staff')
-    
-    try:
-        response = requests.delete(
-            f'{FASTAPI_BASE_URL}/staff/delete_staff',
-            params={'staff_id': int(pk)},
-            headers=headers,
-            timeout=10
-        )
-        
-        if response.status_code == 200:
-            messages.success(request, f'Сотрудник #{pk} успешно удалён')
-            return redirect('staff')
-        elif response.status_code == 401:
-            return redirect('login')
-        elif response.status_code == 404:
-            messages.error(request, 'Сотрудник не найден')
-            return redirect('staff')
-        elif response.status_code == 409 or response.status_code == 422:
-            error = response.json()
-            messages.error(request, f'Ошибка: {error["error"]}')
-            return redirect('staff')
-
-        
-        else:
-            error_msg = response.json().get('detail', 'Неизвестная ошибка')
-            messages.error(request, f'Ошибка: {error_msg}')
-            print(response.json())
-            return redirect('staff')
-            
-    except requests.exceptions.ConnectionError:
-        messages.error(request, 'Не удалось подключиться к серверу FastAPI')
-        return redirect('staff')
-    except Exception as e:
-        messages.error(request, f'Ошибка в staff_delete: {str(e)}')
-        return redirect('staff')
-
-
 # профиль
 def infome(request):
     headers = get_headers(request)
