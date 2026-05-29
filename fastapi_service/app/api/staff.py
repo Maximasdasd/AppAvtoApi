@@ -60,6 +60,7 @@ def get_staff_all(id: int, controller: StaffController = Depends(get_controllers
 
 @router.post("/create_staff", response_model=StaffResponsePublic)
 def create_staff(staff_data: StaffCreate, 
+                 status_code=201,
                  controller: StaffController = Depends(get_controllers_staff), 
                  token: str = Depends(oauth2_scheme), 
                  check_roles: str = Depends(wrapprer_check_roles(['admin']))) -> StaffResponsePublic:
