@@ -1,196 +1,346 @@
-# **О проект**
-Car Rental Management API — это backend-приложение для системы управления автопрокатом автомобилей, построенное на FastAPI. Приложение предоставляет полный набор REST API для автоматизации всех бизнес-процессов проката: от регистрации клиентов и управления автопарком до обработки аренд, ремонтов и генерации аналитических отчетов.
+# Car Rental Management System (AppAvtoApi)
 
+Система управления автопрокатом из двух сервисов: **FastAPI** (бэкенд с бизнес-логикой и БД) и **Django** (веб-интерфейс с формами и страницами). Django общается с FastAPI по HTTP, авторизация — через JWT.
 
+-----
 
-## **Технологии**
-FastAPI 0.104.1 — современный, быстрый веб-фреймворк
+## Архитектура
 
-PostgreSQL — реляционная база данных
+```
+┌────────────────┐      HTTP + JWT       ┌────────────────────┐
+│  Django (web)  │ ───────────────────►  │  FastAPI (backend) │
+│  формы, шаблоны│  ◄─────────────────── │  логика + БД       │
+│  сессии, токен │      JSON-ответы      │  PostgreSQL        │
+└────────────────┘                       └────────────────────┘
+        :8001 (условно)                          :8000
+```
 
-SQLAlchemy 2.0.23 — ORM для работы с БД
+- **FastAPI** хранит все данные в PostgreSQL, выдаёт REST API, проверяет роли и токены.
+- **Django** не имеет собственной бизнес-БД (только служебный `sqlite3` для сессий) — он берёт данные из FastAPI через `requests` и рендерит HTML. Токен FastAPI хранится в сессии Django.
 
-Pydantic 2.5.0 — валидация данных и сериализация
+-----
 
-JWT — аутентификация через токены
+## Технологии
 
-Uvicorn — ASGI-сервер
+**FastAPI-сервис**
 
+- FastAPI, Uvicorn — веб-фреймворк и ASGI-сервер
+- SQLModel / SQLAlchemy 2.0 — ORM
+- PostgreSQL — основная база данных
+- Pydantic 2 — валидация и сериализация
+- Alembic — миграции
+- JWT (python-jose) + bcrypt — аутентификация и хеширование паролей
+- fastapi-pagination — пагинация списков
 
+**Django-сервис**
 
-## **Структура проекта**
-appAvto\fastapi_service\
-appAvto\django_web\
+- Django 5 — веб-интерфейс (server-side rendering)
+- requests — обращения к FastAPI
+- SQLite — только для служебных нужд Django (сессии)
 
+-----
 
-## **Структура базы данных**
-Основные таблицы:
-staff — сотрудники системы
-staff_id (int, PK) — уникальный идентификатор сотрудника
-username (str) — логин для входа
-full_name (str) — полное имя сотрудника
-password_hashed (str) — хешированный пароль
-email (str) — электронная почта
-phone (str) — контактный телефон
-position (UserRole) — должность/роль (manager/admin/director)
+## Структура проекта
 
-clients — клиенты проката
-client_id (int, PK) — уникальный идентификатор клиента
-full_name (str) — полное имя клиента
-driver_license (str) — номер водительского удостоверения (уникальный)
-passport (str) — паспортные данные
-address (str) — адрес проживания
-created_at (datetime) — дата регистрации
-is_active (bool) — статус активности
+```
+AppAvtoApi/
+├── docker-compose.yml          # FastAPI + PostgreSQL
+├── car_dashboard.html          # автономный дашборд (статичный)
+│
+├── fastapi_service/            # БЭКЕНД
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   ├── alembic.ini
+│   ├── alembic/                # миграции
+│   ├── scripts/
+│   │   ├── data_generate.py    # генерация фейковых данных
+│   │   └── seed_data.py
+│   ├── tests/
+│   │   ├── conftest.py         # общие фикстуры
+│   │   ├── test_api.py         # юнит-тесты (моки контроллеров)
+│   │   └── test_integration.py # интеграционные тесты (SQLite)
+│   └── app/
+│       ├── main.py             # точка входа, регистрация роутов
+│       ├── api/                # роуты (staff, client, car, rental, repair)
+│       ├── controllers/        # бизнес-логика
+│       ├── dependencies/       # DI-провайдеры контроллеров
+│       ├── schemas/            # Pydantic-схемы запросов/ответов
+│       ├── models/model.py     # таблицы БД (SQLModel)
+│       ├── core/
+│       │   ├── config.py       # настройки (env, JWT)
+│       │   ├── security.py     # JWT, хеши, проверка ролей
+│       │   └── global_handler.py # обработчики ошибок
+│       └── db/db.py            # движок, сессии, создание админа
+│
+└── django_service/             # ФРОНТЕНД
+    ├── manage.py
+    ├── requirements.txt
+    ├── db.sqlite3              # служебная БД Django (сессии)
+    ├── django_service/         # настройки проекта
+    │   ├── settings.py
+    │   └── urls.py
+    └── core/
+        ├── views.py            # вьюхи: дашборд, CRUD-страницы
+        ├── urls.py             # маршруты Django
+        ├── fastapi_client.py   # логин в FastAPI, заголовки, токен
+        └── templates/          # HTML-шаблоны
+```
 
-cars — автомобили автопарка
-car_id (int, PK) — уникальный идентификатор автомобиля
-number_car (str) — государственный регистрационный номер
-brand (str) — марка автомобиля
-color (str) — цвет автомобиля
-year (int) — год выпуска
-is_available (CarStatus) — статус доступности (available/rented/under_repair)
-category (CarCategory) — категория автомобиля (ECONOMY/STANDARD/PREMIUM/LUX)
-daily_price (float) — цена аренды за сутки
+-----
 
-rentals — аренда автомобилей
-rental_id (int, PK) — уникальный идентификатор аренды
-client_id (int, FK → clients) — ссылка на клиента
-car_id (int, FK → cars) — ссылка на автомобиль
-staff_id (int, FK → staff) — ссылка на сотрудника, оформившего аренду
-status_rent (RentalStatus) — статус аренды (completed/cancelled/active)
-start_time (datetime) — время начала аренды
-end_time (datetime) — время окончания аренды
-total_hours (float) — общая продолжительность аренды в часах
-total_price (float) — общая стоимость аренды
+## База данных
 
-repairs — ремонты автомобилей
-repair_id (int, PK) — уникальный идентификатор ремонта
-car_id (int, FK → cars) — ссылка на автомобиль
-start_rep (datetime) — дата начала ремонта
-end_rep (datetime) — дата окончания ремонта
-price_rep (float) — стоимость ремонта
+Основные таблицы (FastAPI / PostgreSQL):
 
-eventlog — журнал событий системы
-eventLog_id (int, PK) — уникальный идентификатор записи
-event_time (datetime) — время события
-operation (str) — тип операции
-client_id (int, FK → clients, nullable) — ссылка на клиента (если применимо)
-staff_id (int, FK → staff, nullable) — ссылка на сотрудника (если применимо)
-description (str) — описание события
+|Таблица       |Назначение           |Ключевые поля                                                                      |
+|--------------|---------------------|-----------------------------------------------------------------------------------|
+|`staff`       |сотрудники           |`staff_id`, `username`, `password_hashed`, `position` (роль)                       |
+|`client`      |клиенты проката      |`client_id`, `full_name`, `driver_license` (уник.), `passport` (уник.), `is_active`|
+|`cars`        |автопарк             |`car_id`, `number_car` (уник.), `brand`, `category`, `is_available`, `daily_price` |
+|`rental`      |аренды               |`rental_id`, `client_id`, `car_id`, `staff_id`, `status_rent`, `total_price`       |
+|`repair`      |ремонты              |`repair_id`, `car_id`, `start_rep`, `end_rep`, `price_rep`                         |
+|`eventlog`    |журнал событий       |`eventLog_id`, `operation`, `description`                                          |
+|`refreshtoken`|refresh-токены сессий|`token_id`, `token`, `staff_id`, `is_revoked`                                      |
 
+### Перечисления (enums)
 
-## **Роли пользователей:**
+- **Роли (`UserRole`)**: `manager`, `admin`, `director`
+- **Статус машины (`CarStatus`)**: `available`, `rented`, `under_repair`
+- **Категория (`CarCategory`)**: `ECONOMY`, `STANDARD`, `PREMIUM`, `LUX`
+- **Статус аренды (`RentalStatus`)**: `active`, `completed`, `cancelled`
 
-Администратор (admin) — полный доступ кроме отчетности
-Директор (director) — полный доступ с отчетностью
-Пользователь (manager) — работа с клиентами, авто, арендой, ремонтом
+### Роли пользователей
 
-## ***Установка и запуск***
+- **Администратор (`admin`)** — полный доступ, кроме отчётности
+- **Директор (`director`)** — полный доступ, включая отчётность
+- **Менеджер (`manager`)** — работа с клиентами, авто, арендой, ремонтом
 
-1. Клонирование репозитория
-git clone <ваш-репозиторий>
-cd appAvto
+-----
 
-2. Создание виртуального окружения  
-python -m venv venv  
-source venv/bin/activate  # Linux/Mac  
-venv\Scripts\activate     # Windows  
+## Установка и запуск
 
-3. Установка зависимостей  
+### Вариант 1. Docker (рекомендуется для FastAPI + PostgreSQL)
+
+Из корня проекта:
+
+```bash
+docker-compose up --build
+```
+
+Поднимется FastAPI на `http://localhost:8000` и PostgreSQL (БД `AVTOprokat`, пользователь `postgres`, пароль `root`). Django при этом запускается отдельно (см. ниже).
+
+### Вариант 2. Локальный запуск FastAPI
+
+```bash
+cd fastapi_service
+
+# виртуальное окружение
+python -m venv venv
+source venv/bin/activate        # Linux/Mac
+venv\Scripts\activate           # Windows
+
 pip install -r requirements.txt
+```
 
-4. Настройка базы данных  
-Создайте файл .env в корневой папке:  
+Создайте файл `.env` в каталоге `fastapi_service/` (рядом с `app/`):
+
+```env
 BD_HOST=localhost
 BD_USER=postgres
 BD_PASSWORD=root
 BD_NAME=AVTOprokat
+SECRET_KEY=ваш_секрет
+```
 
+Создайте БД `AVTOprokat` в PostgreSQL, затем примените миграции. В `alembic.ini` укажите свой `sqlalchemy.url`:
 
-СДЕЛАТЬ ПОСЛЕ СОЗДАНИЯ БД!!!  
-ДЛЯ МИГРАЦИЙ!!  
-Откройте alembic.ini.  
-Найдите строку sqlalchemy.url.  
-Измените её на ваши параметры подключения:  
-PostgreSQL: postgresql://user:password@localhost:5432/dbname 
-MySQL: mysql+pymysql://user:password@localhost:3306/dbname  
+```
+postgresql://postgres:root@localhost:5432/AVTOprokat
+```
 
-И ВВЕСТИ ДАННУЮ КОМАНДУ  
+```bash
 alembic upgrade head
+```
 
+Запуск API (из каталога `app/`):
 
-5. Запуск приложения  
-API  
-ИЗ ДИРЕКТОРИИ!!! appAvto\fastapi_service\app  
-cd C:\Users\79000\Desktop\appAvto\fastapi_service\app>  
-ЗАПУСК!!!  
+```bash
+cd app
 python -m main
+```
 
+При старте автоматически создаётся администратор:
+**логин `qweqwe`, пароль `qwerty`**.
 
-6. (Только для разработчиков) создание миграции команда:  
-alembic revision --autogenerate -m "Название миграции(например что меняется)"  
-alembic upgrade head
+Документация после запуска:
 
+- Swagger UI — <http://localhost:8000/docs>
+- ReDoc — <http://localhost:8000/redoc>
 
-7. для вставки фейк данных (тестирования) или для докера  
-Необходимо поменять в файле config переменную к пути .env файла  
-тк для фейк данных или докера запускается с другой директории
+### Вариант 3. Запуск Django-интерфейса
 
+FastAPI должен быть уже запущен (Django ходит на `http://127.0.0.1:8000`).
 
-Документация API  
-После запуска приложения доступны:
+```bash
+cd django_service
+pip install -r requirements.txt
+python manage.py migrate          # служебные таблицы Django (сессии)
+python manage.py runserver
+```
 
-Swagger UI: http://localhost:8000/docs
+Вход в систему: страница логина Django принимает логин/пароль сотрудника, под капотом логинится в FastAPI и сохраняет JWT в сессию.
 
-ReDoc: http://localhost:8000/redoc
+### Генерация тестовых данных
 
+```bash
+# в fastapi_service переключить путь к .env в config.py при необходимости
+python scripts/data_generate.py
+```
 
+-----
 
+## Тестирование (FastAPI)
 
-## **Конфигурация**
-Настройки в app/config.py:
-ACCESS_TOKEN_EXPIRE_MINUTES — время жизни токена (по умолчанию 30 минут)
+```bash
+cd fastapi_service
+pip install -r requirements.txt
+pytest tests/ -v
+```
 
-ALGORITHM — алгоритм шифрования JWT (HS256)
+- `tests/test_api.py` — **юнит-тесты**: контроллеры замоканы (`MagicMock`), реальная БД не используется. Проверяют роуты, коды ответов, валидацию.
+- `tests/test_integration.py` — **интеграционные тесты**: реальное приложение поверх in-memory SQLite, запрос проходит весь стек (роут → контроллер → БД → ответ).
+- `tests/conftest.py` — общие фикстуры. Не требует PostgreSQL: на время тестов БД подменяется на SQLite.
 
-Проекция на разные среды (development, production)
+Запуск по отдельности:
+
+```bash
+pytest tests/test_api.py -v           # только юнит
+pytest tests/test_integration.py -v   # только интеграционные
+```
+
+Оценка покрытия:
+
+```bash
+pytest tests/ --cov=app --cov-report=term-missing
+```
+
+-----
+
+## REST API (FastAPI)
+
+Все защищённые эндпоинты требуют заголовок `Authorization: Bearer <access_token>`.
+Списочные ответы возвращаются с пагинацией (`items`, `total`, `page`, `size`, `pages`).
+
+### Staff (`/staff`)
+
+|Метод|Путь                         |Доступ        |Описание                                           |
+|-----|-----------------------------|--------------|---------------------------------------------------|
+|POST |`/staff/login_staff`         |все           |вход (form-data: username, password), выдаёт токены|
+|POST |`/staff/create_staff`        |admin         |создать сотрудника                                 |
+|GET  |`/staff/get_staff_all`       |admin         |список сотрудников                                 |
+|GET  |`/staff/get_staff_by_id/{id}`|авториз.      |сотрудник по id                                    |
+|GET  |`/staff/info_me`             |admin, manager|данные текущего пользователя из токена             |
+|POST |`/staff/refresh_token`       |—             |ротация refresh-токена                             |
+|POST |`/staff/refresh_token_revoke`|admin         |отозвать refresh-токен                             |
+
+### Client (`/client`)
+
+|Метод|Путь                        |Доступ        |Описание             |
+|-----|----------------------------|--------------|---------------------|
+|GET  |`/client/get_clients_all`   |admin, manager|список клиентов      |
+|GET  |`/client/get_client/{id}`   |admin, manager|клиент по id         |
+|POST |`/client/create_client`     |admin, manager|создать клиента (201)|
+|PATCH|`/client/refresh_client{id}`|admin, manager|обновить клиента     |
+
+### Car (`/car`)
+
+|Метод |Путь                  |Доступ        |Описание                                      |
+|------|----------------------|--------------|----------------------------------------------|
+|GET   |`/car/get_cars_all`   |admin, manager|список машин                                  |
+|GET   |`/car/get_car/{id}`   |admin, manager|машина по id                                  |
+|POST  |`/car/create_car`     |admin, manager|создать машину (201)                          |
+|DELETE|`/car/delete_car/{id}`|admin, manager|удалить машину (нельзя, если в аренде/ремонте)|
+
+### Rental (`/rental`)
+
+|Метод |Путь                                      |Доступ        |Описание                       |
+|------|------------------------------------------|--------------|-------------------------------|
+|GET   |`/rental/get_rental_all`                  |admin, manager|список аренд                   |
+|POST  |`/rental/create_rental`                   |admin, manager|создать аренду (201)           |
+|PATCH |`/rental/rent_complete?rent_id=`          |admin, manager|завершить аренду               |
+|PATCH |`/rental/rent_cancelled?rent_id=`         |admin, manager|отменить аренду                |
+|GET   |`/rental/get_rent_by_id?rent_id=`         |admin, manager|аренда по id                   |
+|GET   |`/rental/get_rent_by_client_id?client_id=`|admin, manager|аренды клиента                 |
+|GET   |`/rental/get_rent_by_car_id?car_id=`      |admin, manager|аренды по машине               |
+|GET   |`/rental/get_rent_by_staff_id?staff_id=`  |admin, manager|аренды по сотруднику           |
+|GET   |`/rental/get_rent_by_status?status_rent=` |admin, manager|аренды по статусу              |
+|DELETE|`/rental/clear_list_rent`                 |admin         |очистить завершённые/отменённые|
+
+### Repair (`/repair`)
+
+|Метод |Путь                                    |Доступ        |Описание            |
+|------|----------------------------------------|--------------|--------------------|
+|GET   |`/repair/get_repair_all`                |admin, manager|список ремонтов     |
+|POST  |`/repair/create_repair`                 |admin, manager|создать ремонт (201)|
+|PATCH |`/repair/complete_repair?repair_id=`    |admin, manager|завершить ремонт    |
+|GET   |`/repair/get_repair_by_id?repair_id=`   |admin, manager|ремонт по id        |
+|GET   |`/repair/get_repair_car_by_id?car_id=`  |admin, manager|ремонты по машине   |
+|DELETE|`/repair/delete_repair_by_id?repair_id=`|admin         |удалить ремонт      |
+|DELETE|`/repair/all_delete_repair`             |admin         |удалить все ремонты |
+
+-----
+
+## Веб-интерфейс (Django)
+
+|Страница      |URL               |Описание                                |
+|--------------|------------------|----------------------------------------|
+|Логин         |`/login_staff/`   |вход через FastAPI                      |
+|Дашборд       |`/dashboard`      |сводка: клиенты, авто, аренды, ремонты  |
+|Авто          |`/cars/`          |список, поиск, фильтр по статусу        |
+|Карточка авто |`/cars/<id>/`     |детали + история аренд                  |
+|Клиенты       |`/clients/`       |список, поиск, создание                 |
+|Аренды        |`/rentals/`       |список + счётчики по статусам           |
+|Создать аренду|`/rentals/create/`|форма (выбор клиента и свободной машины)|
+|Ремонты       |`/repairs/`       |список, создание, завершение, удаление  |
+|Сотрудники    |`/staff/`         |список, карточка, создание              |
+|Профиль       |`/infome/`        |данные текущего пользователя            |
+
+-----
+
+## Конфигурация и безопасность
+
+Настройки в `app/core/config.py`:
+
+- `ACCESS_TOKEN_EXPIRE_MINUTES` — время жизни access-токена (по умолчанию 30 минут)
+- `REFRESH_TOKEN_EXPIRE_DAYS` — время жизни refresh-токена (по умолчанию 30 дней)
+- `ALGORITHM` — алгоритм JWT (`HS256`)
 
 Безопасность:
-Пароли хранятся в хешированном виде (argon2)
 
-JWT токены для аутентификации
+- пароли хранятся в виде bcrypt-хешей;
+- доступ к эндпоинтам разграничен по ролям;
+- сессии используют access + refresh токены с возможностью отзыва.
 
-Разделение прав доступа
+-----
 
+## Коды ответов
 
+|Код|Значение                               |
+|---|---------------------------------------|
+|200|успешный запрос                        |
+|201|успешное создание                      |
+|400|ошибка в данных / бизнес-правило       |
+|401|требуется авторизация / токен невалиден|
+|403|недостаточно прав                      |
+|404|ресурс не найден                       |
+|409|конфликт (дубликат)                    |
+|422|ошибка валидации                       |
+|500|внутренняя ошибка сервера              |
 
-Особенности реализации
-Пагинация
-Все списковые endpoints поддерживают пагинацию:
+-----
 
-limit — количество записей на странице (максимум 100)
+## Известные ограничения
 
-
-
-
-### **Обработка ошибок**
-Приложение возвращает информативные HTTP статусы:
-
-200 — успешный запрос
-
-201 — успешное создание
-
-400 — ошибка в данных
-
-401 — требуется авторизация
-
-403 — недостаточно прав
-
-404 — ресурс не найден
-
-409 — конфликт данных
-
-422 — ошибка валидации
-
-500 — внутренняя ошибка сервера
+- Часть эндпоинтов поиска при пустом результате возвращает нестандартный ответ — это учтено на стороне Django.
+- Django-интерфейс рассчитан на запущенный и доступный FastAPI-сервис на `127.0.0.1:8000`.
+- Для production-развёртывания вынесите секреты (`SECRET_KEY`, пароль БД) в переменные окружения и не храните их в репозитории.
