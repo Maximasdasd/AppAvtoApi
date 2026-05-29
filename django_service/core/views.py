@@ -1185,7 +1185,7 @@ def staff_create(request):
                 headers=headers
             )
             
-            if response.status_code == 200:
+            if response.status_code == 201:
                 messages.success(request, 'Сотрудник успешно создан')
                 return redirect('staff')
             elif response.status_code == 409 or response.status_code == 422:
