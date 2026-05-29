@@ -203,7 +203,8 @@ class RentalController:
 
     def get_rent_by_status(self, status_rent: str):
         if status_rent in RentalStatus.__members__:
-            rent = select(RentalModel).where(RentalModel.status_rent == status_rent).order_by(RentalModel.rental_id)
+            rent_status = RentalStatus[status_rent]
+            rent = select(RentalModel).where(RentalModel.status_rent == rent_status).order_by(RentalModel.rental_id)
             result = self.db.execute(rent).scalars().all()
             if result:
                 return paginate(self.db, rent)
