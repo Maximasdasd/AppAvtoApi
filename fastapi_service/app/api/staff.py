@@ -58,11 +58,10 @@ def get_staff_all(id: int, controller: StaffController = Depends(get_controllers
         return controller.get_staff_by_id(id)
     
 
-@router.post("/create_staff", response_model=StaffResponsePublic)
-def create_staff(staff_data: StaffCreate, 
-                 status_code=201,
-                 controller: StaffController = Depends(get_controllers_staff), 
-                 token: str = Depends(oauth2_scheme), 
+@router.post("/create_staff", response_model=StaffResponsePublic, status_code=201)
+def create_staff(staff_data: StaffCreate,
+                 controller: StaffController = Depends(get_controllers_staff),
+                 token: str = Depends(oauth2_scheme),
                  check_roles: str = Depends(wrapprer_check_roles(['admin']))) -> StaffResponsePublic:
     """
     Создание учетной записи сотрудника
