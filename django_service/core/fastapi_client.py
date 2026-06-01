@@ -36,8 +36,6 @@ def auto_login_to_fastapi(request):
         timeout=5,
     )
     
-    print(f"Логин ответ: {resp.status_code}")
-    print(f"Логин тело: {resp.text[:300]}")
     
     if resp.ok:
         token_data = resp.json()

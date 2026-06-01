@@ -1,19 +1,5 @@
-
-version: '3.8'
 services:
-  app:
-    build: .
-    ports:
-      - "8000:8000"
-    environment:
-      - BD_HOST=db
-      - BD_PORT=5432
-      - BD_NAME=AVTOprokat
-      - BD_USER=postgres
-      - BD_PASSWORD=root
-    depends_on:
-      - db
-
+  # ---------- База данных PostgreSQL ----------
   db:
     image: postgres:15
     environment:
@@ -24,6 +10,40 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d AVTOprokat"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ---------- Бэкенд на FastAPI ----------
+  fastapi:
+    build: ./fastapi_service
+    ports:
+      - "8000:8000"        # FastAPI  -> http://localhost:8000
+      - "8001:8001"        # Django   -> http://localhost:8001 (Django делит эту сеть)
+    environment:
+      BD_HOST: db
+      BD_USER: postgres
+      BD_PASSWORD: root
+      BD_NAME: AVTOprokat
+      SECRET_KEY: zlqp1937
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      REFRESH_TOKEN_EXPIRE_DAYS: 30
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ---------- Веб на Django ----------
+  django:
+    build: ./django_service
+    # Django делит сетевое пространство с FastAPI, поэтому хардкод
+    # http://127.0.0.1:8000 в коде Django реально попадает в FastAPI.
+    # Никакие исходники проекта менять не нужно.
+    network_mode: "service:fastapi"
+    depends_on:
+      - fastapi
 
 volumes:
   postgres_data:
