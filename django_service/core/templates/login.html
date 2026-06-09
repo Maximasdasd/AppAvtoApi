@@ -27,7 +27,7 @@
     <div class="login-sub">Введите данные вашей учётной записи</div>
  
     <!-- В Django это будет form.action = /login_staff (отправляет в FastAPI через прокси) -->
-    <form method="post" action="/login_staff/">
+    <form method="post" action="/">
       {% csrf_token %}
       <div class="form-group">
         <label for="username">Логин</label>

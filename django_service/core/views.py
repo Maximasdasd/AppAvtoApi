@@ -383,13 +383,13 @@ def cars(request):
         print(f"Ошибка при получении данных cars: {e}")
         context["cars"] = []
 
-    return render(request, 'cars.html', context)
+    return render(request, 'car/cars.html', context)
 
 
 def cars_create(request):
     headers=get_headers(request)
     if request.method != 'POST':
-        return render(request, 'car_create.html')
+        return render(request, 'car/car_create.html')
     
     # Получаем данные из формы
     number_car = request.POST.get('number_car')
@@ -402,7 +402,7 @@ def cars_create(request):
     # Простая валидация чтобы все поля были заполнены
     if not all([number_car, brand, category, color, year_release, daily_price]):
         messages.error(request, 'Заполните все поля')
-        return render(request, 'car_create.html')
+        return render(request, 'car/car_create.html')
     # Готовим данные для отправки в FastAPI
     car_data = {
         'number_car': number_car,
@@ -464,7 +464,7 @@ def cars_detail(request, pk):
                     'car': car_data,
                     'car_rentals': rentals,
                 }
-                return render(request, 'car_detail.html', context)
+                return render(request, 'car/car_detail.html', context)
             elif response.status_code == 404:
                 messages.error(request, 'Автомобиль не найден')
                 return redirect('cars')
@@ -504,7 +504,7 @@ def clients(request):
     
     if not headers:
         messages.error(request, 'Ошибка авторизации')
-        return render(request, 'clients.html', {'clients': {'items': []}, 'clients_total': 0})
+        return render(request, 'client/clients.html', {'clients': {'items': []}, 'clients_total': 0})
     
     # Получаем параметр поиска из GET-запроса
     search_query = request.GET.get('search', '').strip()
@@ -534,7 +534,7 @@ def clients(request):
                 'clients_total': len(clients_list),
                 'search_query': search_query,  # передаём для отображения в поле поиска
             }
-            return render(request, 'clients.html', context)
+            return render(request, 'client/clients.html', context)
             
         elif response.status_code == 401:
             return redirect('login')
@@ -547,13 +547,13 @@ def clients(request):
     except Exception as e:
         messages.error(request, f'Ошибка: {str(e)}')
     
-    return render(request, 'clients.html', {'clients': {'items': []}, 'clients_total': 0})
+    return render(request, 'client/clients.html', {'clients': {'items': []}, 'clients_total': 0})
 
 
 def client_create(request):
     headers=get_headers(request)
     if request.method != 'POST':
-        return render(request, 'client_create.html')
+        return render(request, 'client/client_create.html')
     
     # Получаем данные из формы
     passport = request.POST.get('passport')
@@ -563,7 +563,7 @@ def client_create(request):
     # Простая валидация чтобы все поля были заполнены
     if not all([passport, address, driver_license, full_name]):
         messages.error(request, 'Заполните все поля')
-        return render(request, 'client_create.html')
+        return render(request, 'client/client_create.html')
     # Готовим данные для отправки в FastAPI
     client_data = {
         'full_name': full_name,
@@ -620,7 +620,7 @@ def client_detail(request, pk):
                     'client': client_data,
                     'rentals': rentals,
                 }
-                return render(request, 'client_detail.html', context)
+                return render(request, 'client/client_detail.html', context)
             elif response.status_code == 404:
                 messages.error(request, 'Клиент не найден')
                 return redirect('clients')
@@ -683,7 +683,7 @@ def rentals(request):
         else:
             messages.error(request, f'Ошибка rentals: {response.json().get("detail", "Неизвестная ошибка")}')
 
-    return render(request, 'rentals.html', context)
+    return render(request, 'rental/rentals.html', context)
 
 def btn_rentals_create(request):
     pass
@@ -784,7 +784,7 @@ def rentals_create(request):
             'clients': clients,
             'available_cars': cars_is_available,
         }
-        return render(request, 'rental_create.html', context)
+        return render(request, 'rental/rental_create.html', context)
         
     except requests.exceptions.ConnectionError:
         messages.error(request, 'Не удалось подключиться к серверу FastAPI')
@@ -808,7 +808,7 @@ def rentals_detail(request, pk):
                 context = {
                     'rental': rental,
                 }
-                return render(request, 'rental_detail.html', context)
+                return render(request, 'rental/rental_detail.html', context)
             elif response.status_code == 401:
                 return redirect('login')
             elif response.status_code == 404:
@@ -824,7 +824,7 @@ def rentals_detail(request, pk):
     except Exception as e:
         messages.error(request, f'Ошибка rentals_detail: {str(e)}')
         return redirect('rentals')
-    return render(request, 'rental_detail.html')
+    return render(request, 'rental/rental_detail.html')
 
 def rental_complete(request, pk):
     headers = get_headers(request)
@@ -892,7 +892,7 @@ def repairs(request):
     
     if not headers:
         messages.error(request, 'Ошибка авторизации')
-        return render(request, 'repairs.html', context)
+        return render(request, 'repair/repairs.html', context)
     
     try:
         response = requests.get(
@@ -904,7 +904,7 @@ def repairs(request):
         if response.status_code == 200:
             repairs_data = response.json()
             context['repairs'] = repairs_data
-            return render(request, 'repairs.html', context)
+            return render(request, 'repair/repairs.html', context)
             
         elif response.status_code == 401:
             return redirect('login')
@@ -912,14 +912,14 @@ def repairs(request):
         else:
             # Вместо редиректа на ту же страницу — показываем шаблон с ошибкой
             messages.error(request, f'Ошибка загрузки: код {response.status_code}')
-            return render(request, 'repairs.html', context)
+            return render(request, 'repair/repairs.html', context)
             
     except requests.exceptions.ConnectionError:
         messages.error(request, 'Не удалось подключиться к серверу')
-        return render(request, 'repairs.html', context)
+        return render(request, 'repair/repairs.html', context)
     except Exception as e:
         messages.error(request, f'Ошибка repairs: {str(e)}')
-        return render(request, 'repairs.html', context)
+        return render(request, 'repair/repairs.html', context)
 
 def repairs_create(request):
     headers = get_headers(request)
@@ -997,7 +997,7 @@ def repairs_create(request):
         context = {
             'cars_is_available': cars_is_available,
         }
-        return render(request, 'repair_create.html', context)
+        return render(request, 'repair/repair_create.html', context)
         
     except requests.exceptions.ConnectionError:
         messages.error(request, 'Не удалось подключиться к серверу FastAPI')
@@ -1015,7 +1015,7 @@ def repairs_detail(request, pk):
     
     if not headers:
         messages.error(request, 'Ошибка авторизации')
-        return render(request, 'repairs.html', context)
+        return render(request, 'repair/repairs.html', context)
     
     try:
         response = requests.get(
@@ -1028,7 +1028,7 @@ def repairs_detail(request, pk):
         if response.status_code == 200:
             repair_data = response.json()
             context['repair'] = repair_data
-            return render(request, 'repair_detail.html', context)
+            return render(request, 'repair/repair_detail.html', context)
             
         elif response.status_code == 401:
             return redirect('login')
@@ -1036,14 +1036,14 @@ def repairs_detail(request, pk):
         else:
             # Вместо редиректа на ту же страницу — показываем шаблон с ошибкой
             messages.error(request, f'Ошибка загрузки: код {response.status_code}')
-            return render(request, 'repairs.html', context)
+            return render(request, 'repair/repairs.html', context)
             
     except requests.exceptions.ConnectionError:
         messages.error(request, 'Не удалось подключиться к серверу')
-        return render(request, 'repairs.html', context)
+        return render(request, 'repair/repairs.html', context)
     except Exception as e:
         messages.error(request, f'Ошибка repairs_detail: {str(e)}')
-    return render(request, 'repairs.html', context)
+    return render(request, 'repair/repairs.html', context)
 
 def repairs_delete(request, pk):
     headers = get_headers(request)
@@ -1073,7 +1073,7 @@ def repairs_delete(request, pk):
     except Exception as e:
         messages.error(request, f'Ошибка repair_delete: {str(e)}')
         return redirect('repairs')
-    return render(request, 'repairs.html')
+    return render(request, 'repair/repairs.html')
 
 
 
@@ -1098,7 +1098,7 @@ def repair_complete(request, pk):
             elif response.status_code == 401:
                 return redirect('login')
             elif response.status_code == 404:
-                messages.error(request, 'Аренда не найден')
+                messages.error(request, 'Ремонт не найден')
                 return redirect('repairs')
             else:
                 print(response.json())
@@ -1110,7 +1110,7 @@ def repair_complete(request, pk):
     except Exception as e:
         messages.error(request, f'Ошибка repair_complete: {str(e)}')
         return redirect('repairs')
-    return render(request, 'repairs.html')
+    return render(request, 'repair/repairs.html')
 
 # сотрудники
 def staff(request):
@@ -1135,7 +1135,7 @@ def staff(request):
     except Exception as e:
         messages.error(request, f'Ошибка staff: {str(e)}')
         return redirect('staff')
-    return render(request, 'staff.html', context)
+    return render(request, 'staff/staff.html', context)
 
 def staff_create(request):
     headers = get_headers(request)
@@ -1205,7 +1205,7 @@ def staff_create(request):
             messages.error(request, f'Ошибка staff_create: {str(e)}')
         
         return redirect('staff')
-    return render(request, 'staff_create.html')
+    return render(request, 'staff/staff_create.html')
     
 
 
@@ -1248,7 +1248,7 @@ def staff_detail(request, pk):
     except Exception as e:
         messages.error(request, f'Ошибка staff_detail: {str(e)}')
         return redirect('staff')
-    return render(request, 'staff_detail.html', context)
+    return render(request, 'staff/staff_detail.html', context)
 
 
 # профиль

@@ -3,7 +3,7 @@ from . import views
 from . import fastapi_client
 
 urlpatterns = [
-    path('login_staff/', fastapi_client.auto_login_to_fastapi, name="login"),
+    path('', fastapi_client.auto_login_to_fastapi, name="login"),
     path('dashboard', views.dashboard, name="home"),
     path('dashboard/car/create_car', views.car_create, name='create_car'),
     path('dashboard/rental/create_rental', views.rent_create, name='create_rental'),
