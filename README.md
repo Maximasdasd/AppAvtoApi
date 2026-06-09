@@ -121,6 +121,34 @@ AppAvtoApi/
 
 ### Вариант 1. Docker (рекомендуется для FastAPI + PostgreSQL)
 
+## Запуск через Docker
+
+Требуется только установленный Docker (Docker Desktop). Python, PostgreSQL и .env ставить не нужно.
+
+1. Клонировать репозиторий и зайти в папку:
+   git clone https://github.com/Maximasdasd/AppAvtoApi.git
+   cd AppAvtoApi
+
+2. Собрать и запустить все сервисы:
+   docker compose up --build
+
+   (первый запуск качает образы и собирает — несколько минут)
+
+3. Открыть в браузере:
+   - Веб-интерфейс (Django): http://localhost:8001
+   - API + Swagger (FastAPI): http://localhost:8000/docs
+
+4. Войти под админом:
+   - логин: qweqwe
+   - пароль: qwerty
+
+### Полезные команды
+
+- Запуск в фоне:        docker compose up -d --build
+- Посмотреть логи:      docker compose logs -f
+- Остановить:           docker compose down
+- Остановить + стереть БД: docker compose down -v
+
 Из корня проекта:
 
 ```bash
