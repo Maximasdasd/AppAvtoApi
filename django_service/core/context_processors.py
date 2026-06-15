@@ -1,8 +1,8 @@
 # core/context_processors.py
 from core.fastapi_client import get_fastapi_token, get_headers
 import requests
+from django_service.settings import FASTAPI_BASE_URL
 
-FASTAPI_BASE_URL = "http://127.0.0.1:8000"
 
 def user_info(request):
     """Добавляет информацию о пользователе во все шаблоны"""

@@ -213,7 +213,7 @@ FastAPI должен быть уже запущен (Django ходит на `htt
 cd django_service
 pip install -r requirements.txt
 python manage.py migrate          # служебные таблицы Django (сессии)
-python manage.py runserver
+python manage.py runserver 8001
 ```
 
 Вход в систему: страница логина Django принимает логин/пароль сотрудника, под капотом логинится в FastAPI и сохраняет JWT в сессию.

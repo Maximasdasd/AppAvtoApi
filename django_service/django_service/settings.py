@@ -4,7 +4,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure--n1b$#72r)0uy2ny743gz&3!k@8_duok%3)3ybj1ab09kj10tb'
 DEBUG = True
 ALLOWED_HOSTS = []
-
+FASTAPI_BASE_URL = "http://127.0.0.1:8000"
 
 
 

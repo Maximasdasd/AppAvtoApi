@@ -1,8 +1,8 @@
 from django.http import HttpResponse
 import requests
 from django.shortcuts import render, redirect
+from django_service.settings import FASTAPI_BASE_URL
 
-FASTAPI_BASE_URL = "http://127.0.0.1:8000"
 
 def get_fastapi_token(request):
     """
