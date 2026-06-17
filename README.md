@@ -242,6 +242,7 @@ pytest tests/ -v
 Запуск по отдельности:
 
 ```bash
+pytest tests/ -m "not selenium" -v # тесты без селениума
 pytest tests/test_api.py -v           # только юнит
 pytest tests/test_integration.py -v   # только интеграционные
 ```

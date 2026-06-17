@@ -7,7 +7,7 @@ from django.core.paginator import Paginator
 from django.core.paginator import EmptyPage, PageNotAnInteger
 from django_service.settings import FASTAPI_BASE_URL
 
-class TokenExpired:
+class TokenExpired(BaseException):
     pass
 
 def get_fastapi(request, url):

@@ -75,7 +75,7 @@ def mock_fastapi(monkeypatch):
     По умолчанию любой GET/POST/PATCH/DELETE возвращает 200 и пустую страницу.
     Тест может донастроить поведение через возвращаемый объект `m`.
     """
-    import core.views as views
+    import requests
 
     state = {
         "get": FakeResponse(_empty_page(), 200),
@@ -84,10 +84,10 @@ def mock_fastapi(monkeypatch):
         "delete": FakeResponse({"detail": "ok"}, 200),
     }
 
-    monkeypatch.setattr(views.requests, "get", lambda *a, **k: state["get"])
-    monkeypatch.setattr(views.requests, "post", lambda *a, **k: state["post"])
-    monkeypatch.setattr(views.requests, "patch", lambda *a, **k: state["patch"])
-    monkeypatch.setattr(views.requests, "delete", lambda *a, **k: state["delete"])
+    monkeypatch.setattr(requests, "get", lambda *a, **k: state["get"])
+    monkeypatch.setattr(requests, "post", lambda *a, **k: state["post"])
+    monkeypatch.setattr(requests, "patch", lambda *a, **k: state["patch"])
+    monkeypatch.setattr(requests, "delete", lambda *a, **k: state["delete"])
 
     class Controller:
         Response = FakeResponse

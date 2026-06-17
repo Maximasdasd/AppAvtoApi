@@ -24,7 +24,7 @@ class TestLoginFlow:
         # 2. теперь дашборд доступен (200), а не редирект.
         #    FastAPI-данные мокаем точечно через requests.get.
         from unittest.mock import patch
-        import core.views as views
+        import requests
 
         class _Resp:
             status_code = 200
@@ -32,7 +32,7 @@ class TestLoginFlow:
             def json(self):
                 return {"items": [], "total": 0, "page": 1, "size": 50, "pages": 1}
 
-        with patch.object(views.requests, "get", return_value=_Resp()):
+        with patch.object(requests, "get", return_value=_Resp()):
             dash = client.get(reverse("home"))
         assert dash.status_code == 200
 
