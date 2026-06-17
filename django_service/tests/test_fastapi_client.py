@@ -17,35 +17,33 @@ class FakeSessionRequest:
         self.session = session if session is not None else {}
 
 
-# ──────────────────────────────────────────────
 #  get_fastapi_token
-# ──────────────────────────────────────────────
 class TestGetToken:
     def test_returns_token_when_present(self):
+        """Проверяет, что функция возвращает JWT-токен, если он есть в сессии."""
         req = FakeSessionRequest({"fastapi_token": "abc123"})
         assert get_fastapi_token(req) == "abc123"
 
     def test_returns_none_when_absent(self):
+        """Проверяет, что функция возвращает None, если JWT-токен отсутствует в сессии."""
         req = FakeSessionRequest({})
         assert get_fastapi_token(req) is None
 
 
-# ──────────────────────────────────────────────
 #  get_headers
-# ──────────────────────────────────────────────
 class TestGetHeaders:
     def test_headers_with_token(self):
+        """Проверяет, что при наличии токена формируется заголовок Authorization с Bearer-схемой."""
         req = FakeSessionRequest({"fastapi_token": "abc123"})
         assert get_headers(req) == {"Authorization": "Bearer abc123"}
 
     def test_headers_without_token(self):
+        """Проверяет, что при отсутствии токена возвращается пустой словарь заголовков."""
         req = FakeSessionRequest({})
         assert get_headers(req) == {}
 
 
-# ──────────────────────────────────────────────
 #  auto_login_to_fastapi
-# ──────────────────────────────────────────────
 class TestAutoLogin:
     @patch("core.fastapi_client.requests.post")
     def test_login_success_saves_token(self, mock_post):

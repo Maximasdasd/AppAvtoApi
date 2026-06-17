@@ -63,7 +63,7 @@ class TestLoginPage:
     """Проверки самой страницы входа (без реальной авторизации)"""
 
     def test_login_page_has_form(self, driver, live_server):
-        # ПОЗИТИВНЫЙ: форма логина отображается
+        """ПОЗИТИВНЫЙ: форма логина отображается"""
         page = LoginPage(driver, live_server.url).open()
         assert page.has_login_form()
 
@@ -77,7 +77,7 @@ class TestLoginFlow:
     """Сценарии входа. Требуют запущенного FastAPI с qweqwe/qwerty"""
 
     def test_login_with_valid_credentials(self, driver, live_server):
-        # ПОЗИТИВНЫЙ: верные данные → попадаем на дашборд
+        """ПОЗИТИВНЫЙ: верные данные → попадаем на дашборд"""
         login = LoginPage(driver, live_server.url).open()
         login.login(ADMIN_USERNAME, ADMIN_PASSWORD)
 
@@ -85,10 +85,21 @@ class TestLoginFlow:
         assert "/dashboard" in dashboard.current_url
 
     def test_login_with_invalid_credentials(self, driver, live_server):
-        # НЕГАТИВНЫЙ: неверный пароль → на дашборд НЕ пускает, остаёмся на логине
+        """НЕГАТИВНЫЙ: неверный пароль → на дашборд НЕ пускает, остаёмся на логине"""
         login = LoginPage(driver, live_server.url).open()
         login.login(ADMIN_USERNAME, "wrong-password-123")
 
         # форма логина всё ещё на месте, а в URL нет /dashboard
         assert login.has_login_form()
         assert "/dashboard" not in driver.current_url
+
+    def test_login_with_empty_credentials(self, driver, live_server):
+        """НЕГАТИВНЫЙ: пустые поля логина и пароля → остаёмся на странице логина."""
+        login = LoginPage(driver, live_server.url).open()
+        login.login("", "")
+
+        # проверяем, что остались на странице логина
+        assert "/dashboard" not in driver.current_url
+        current_url = driver.current_url.rstrip('/')
+        assert current_url == live_server.url.rstrip('/') or "/login" in current_url
+        assert login.has_login_form()
