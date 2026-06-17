@@ -51,21 +51,9 @@ def driver():
 @pytest.fixture
 def as_admin(driver, live_server):
     """
-    Залогиненный браузер: проходит вход под админом и ждёт дашборд.
+    Залогиненный браузер: проходит вход под админом и ждёт дашборд
     """
     LoginPage(driver, live_server.url).open().login(ADMIN_USERNAME, ADMIN_PASSWORD)
-
-    # --- ВРЕМЕННАЯ ДИАГНОСТИКА (потом удалить) ---
-    import time
-    time.sleep(2)  # даём форме отправиться
-    print("\n\n===== ПОСЛЕ ЛОГИНА =====")
-    print("URL:", driver.current_url)
-    print("TITLE:", driver.title)
-    print("HTML (первые 2000 символов):")
-    print(driver.page_source[:2000])
-    print("===== КОНЕЦ =====\n\n")
-    # --- конец диагностики ---
-
     DashboardPage(driver, live_server.url).wait_loaded()
     return driver
 
