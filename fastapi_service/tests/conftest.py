@@ -181,3 +181,58 @@ def sample_client(db_session):
     db_session.commit()
     db_session.refresh(c)
     return c
+
+
+def make_access_token(role: str = "admin") -> str:
+    from jose import jwt
+    from datetime import datetime, timedelta, timezone
+    payload = {
+        "sub": "1",
+        "roles": [role],
+        "type": "access",
+        "exp": int((datetime.now(timezone.utc) + timedelta(minutes=30)).timestamp()),
+    }
+    return jwt.encode(payload, "test_secret_key_for_tests", algorithm="HS256")
+
+
+@pytest.fixture()
+def app_client():
+    """
+    Каждый тест получает свежий TestClient и свежие моки контроллеров.
+    Пагинируемые эндпоинты мокаются на уровне контроллера — возвращают
+    уже готовый объект Page, чтобы не трогать реальную БД.
+    """
+    from main import app
+    from core.security import oauth2_scheme, wrapprer_check_roles
+    from dependencies.car import get_controllers
+    from dependencies.client import get_controllers_client
+    from dependencies.rental import get_controllers_rental
+    from dependencies.repair import get_controllers_repair
+    from dependencies.staff import get_controllers_staff
+
+    token = make_access_token("admin")
+
+    car_ctrl    = MagicMock()
+    client_ctrl = MagicMock()
+    rental_ctrl = MagicMock()
+    repair_ctrl = MagicMock()
+    staff_ctrl  = MagicMock()
+
+    app.dependency_overrides[oauth2_scheme]                             = lambda: token
+    app.dependency_overrides[wrapprer_check_roles(["admin"])]           = lambda: True
+    app.dependency_overrides[wrapprer_check_roles(["admin", "manager"])]= lambda: True
+    app.dependency_overrides[get_controllers]        = lambda: car_ctrl
+    app.dependency_overrides[get_controllers_client] = lambda: client_ctrl
+    app.dependency_overrides[get_controllers_rental] = lambda: rental_ctrl
+    app.dependency_overrides[get_controllers_repair] = lambda: repair_ctrl
+    app.dependency_overrides[get_controllers_staff]  = lambda: staff_ctrl
+
+    with TestClient(app, raise_server_exceptions=False) as c:
+        c.car_ctrl    = car_ctrl
+        c.client_ctrl = client_ctrl
+        c.rental_ctrl = rental_ctrl
+        c.repair_ctrl = repair_ctrl
+        c.staff_ctrl  = staff_ctrl
+        yield c
+
+    app.dependency_overrides.clear()
